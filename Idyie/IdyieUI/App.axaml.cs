@@ -14,7 +14,6 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        // await VisioForgeX.InitSDKAsync();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
