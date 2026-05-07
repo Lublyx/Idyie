@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Buisness.Service.Interface/" />
+    <Folder Include="Buisness.Service/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260427" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260427" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Version="4.13.0.20260427" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Idyie.Dto/Idyie.Dto.csproj" />
+  </ItemGroup>
+
+</Project>

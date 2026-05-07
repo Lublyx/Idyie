@@ -18,8 +18,10 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260427" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260427" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Version="4.13.0.20260427" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Idyie.Dto/Idyie.Dto.csproj" />
+    <ProjectReference Include="../ServiceInterface/ServiceInterface.csproj" />
   </ItemGroup>
 </Project>
