@@ -10,9 +10,9 @@ public class Streaming : IStreaming
 {
     private IVideoRecording _videoRecording;
 
-    public Streaming(/*IVideoRecording videoRecording*/)
+    public Streaming(IVideoRecording videoRecording)
     {
-        _videoRecording = new VideoRecording();
+        _videoRecording = videoRecording;
     }
 
     public void StartStreaming(Action<AvaloniaVideoData> callback, CancellationToken token)

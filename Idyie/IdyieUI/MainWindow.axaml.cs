@@ -14,26 +14,31 @@ namespace IdyieUI;
 public partial class MainWindow : Avalonia.Controls.Window
 {
 
-    private IStreaming _streaming = new Streaming();
+    private readonly IStreaming _streaming;
+    private CancellationTokenSource? _cts;
 
-    public MainWindow()
+    public MainWindow(IStreaming streaming)
     {
         InitializeComponent();
+        _streaming = streaming;
 
-        Opened += StartVideo;
-
+        BtnStartRecording.Click += StartVideo;
+        BtnStopRecording.Click += StopVideo;
     }
 
     private async void StartVideo(object? sender, EventArgs e)
     {
-        CancellationTokenSource cts = new CancellationTokenSource();
+        _cts = new CancellationTokenSource();
 
         _streaming.StartStreaming(data =>
         {
             ParsFormAvalonia(data);
-        }, cts.Token);
+        }, _cts.Token);
+    }
 
-        // cts.Cancel();
+    private void StopVideo(object? sender, EventArgs e)
+    {
+        _cts?.Cancel();
     }
 
     private void ParsFormAvalonia(AvaloniaVideoData videoData)
