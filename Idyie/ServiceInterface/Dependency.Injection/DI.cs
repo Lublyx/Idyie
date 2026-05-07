@@ -13,6 +13,7 @@ public static class DI
     {
         services.AddSingleton<IVideoRecording, VideoRecording>();
         services.AddSingleton<IStreaming, Streaming>();
+        services.AddSingleton<IFacialRecognition, FacialRecognition>();
 
     }
 }
