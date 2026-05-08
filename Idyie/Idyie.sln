@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceInterface", "Service
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idyie.Dto", "Idyie.Dto\Idyie.Dto.csproj", "{CDE4D416-57EC-453E-987C-09545CFFCD20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idyie.Tcp", "Idyie.Tcp\Idyie.Tcp.csproj", "{23A256E5-BD52-4BF4-B812-A2B2368C265F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,18 @@ Global
 		{CDE4D416-57EC-453E-987C-09545CFFCD20}.Release|x64.Build.0 = Release|Any CPU
 		{CDE4D416-57EC-453E-987C-09545CFFCD20}.Release|x86.ActiveCfg = Release|Any CPU
 		{CDE4D416-57EC-453E-987C-09545CFFCD20}.Release|x86.Build.0 = Release|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Debug|x64.Build.0 = Debug|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Debug|x86.Build.0 = Debug|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x64.ActiveCfg = Release|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x64.Build.0 = Release|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x86.ActiveCfg = Release|Any CPU
+		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

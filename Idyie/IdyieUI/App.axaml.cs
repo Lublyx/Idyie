@@ -18,7 +18,7 @@ public partial class App : Application
 
     public override async void OnFrameworkInitializationCompleted()
     {
-        ServiceCollection collection = new ServiceCollection();
+        IServiceCollection collection = new ServiceCollection();
         collection.Resolve();
         collection.AddSingleton<MainWindow>();
 

@@ -19,7 +19,7 @@ public class VideoRecording : IVideoRecording
         _facialRecognition = facialRecognition;
     }
 
-    public async void StartRecording(Action<AvaloniaVideoData> callback, CancellationToken token)
+    public async Task StartRecording(Action<AvaloniaVideoData> callback, CancellationToken token)
     {
         _callback = callback;
         _token = token;

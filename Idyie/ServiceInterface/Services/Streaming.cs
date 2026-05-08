@@ -8,18 +8,18 @@ namespace ServiceInterface.Services;
 
 public class Streaming : IStreaming
 {
-    private IVideoRecording _videoRecording;
+    private readonly IVideoRecording _videoRecording;
 
     public Streaming(IVideoRecording videoRecording)
     {
         _videoRecording = videoRecording;
     }
 
-    public void StartStreaming(Action<AvaloniaVideoData> callback, CancellationToken token)
+    public async Task StartStreaming(Action<AvaloniaVideoData> callback, CancellationToken token)
     {
         try
         {
-            _videoRecording.StartRecording(callback, token);
+            await _videoRecording.StartRecording(callback, token);
         }
         catch (System.Exception ex)
         {

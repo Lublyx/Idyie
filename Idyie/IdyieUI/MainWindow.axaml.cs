@@ -8,6 +8,12 @@ using Idyie.Dto;
 using System.Threading;
 using ServiceInterface.Interfaces;
 using ServiceInterface.Services;
+using System.Net;
+using Avalonia.Media;
+using System.Net.Sockets;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Buffers;
 
 namespace IdyieUI;
 
@@ -15,7 +21,10 @@ public partial class MainWindow : Avalonia.Controls.Window
 {
 
     private readonly IStreaming _streaming;
-    private CancellationTokenSource? _cts;
+    private const string _ipAdress = "127.0.0.1";
+    private const int _port = 5002;
+    private TcpClient? _tcpClient;
+    private bool _isRunning = false;
 
     public MainWindow(IStreaming streaming)
     {
@@ -28,17 +37,84 @@ public partial class MainWindow : Avalonia.Controls.Window
 
     private async void StartVideo(object? sender, EventArgs e)
     {
-        _cts = new CancellationTokenSource();
-
-        _streaming.StartStreaming(data =>
+        IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(_ipAdress), _port);
+        _tcpClient = new()
         {
-            ParsFormAvalonia(data);
-        }, _cts.Token);
+            NoDelay = true
+        };
+        await _tcpClient.ConnectAsync(endPoint);
+
+        await using NetworkStream stream = _tcpClient.GetStream();
+
+        Console.WriteLine("Connected");
+
+        byte[] sizeBuffer = new byte[4];
+
+        _isRunning = true;
+        while (_isRunning)
+        {
+            await ReadExectAsync(stream, sizeBuffer, 4);
+            int frameSize = BitConverter.ToInt32(sizeBuffer, 0);
+
+            if (frameSize <= 0 || frameSize > 10_000_000)
+            {
+                Console.WriteLine($"Erreur : {frameSize}");
+                break;
+            }
+
+            byte[] pixels = ArrayPool<byte>.Shared.Rent(frameSize);
+
+            try
+            {
+
+                await ReadExectAsync(stream, pixels, frameSize);
+
+                AvaloniaVideoData avaloniaVideoData = new AvaloniaVideoData()
+                {
+                    W = 640,
+                    H = 480,
+                    Size = frameSize,
+                    Pixels = pixels
+                };
+
+                ParsFormAvalonia(avaloniaVideoData);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(pixels);
+            }
+        }
+    }
+
+    private async Task ReadExectAsync(NetworkStream stream, byte[] buffer, int size)
+    {
+        try
+        {
+            int offset = 0;
+
+            while (offset < size)
+            {
+                int read = await stream.ReadAsync(buffer, offset, size - offset);
+
+                if (read == 0)
+                    Console.WriteLine("Disconected");
+
+                offset += read;
+            }
+        }
+        catch
+        {
+            Console.WriteLine("Flux closed");
+            stream.Close();
+            _isRunning = false;
+        }
     }
 
     private void StopVideo(object? sender, EventArgs e)
     {
-        _cts?.Cancel();
+        _tcpClient?.Close();
+        _tcpClient?.Dispose();
+        _isRunning = false;
     }
 
     private void ParsFormAvalonia(AvaloniaVideoData videoData)
