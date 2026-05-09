@@ -15,6 +15,8 @@ public static class DI
         services.AddSingleton<ISIStreaming, SIStreaming>();
         services.AddSingleton<IBSFacialRecognition, BSFacialRecognition>();
         services.AddSingleton<IBSStreamVideo, BSStreamVideo>();
+        services.AddSingleton<IBSServerRedirecting, BSServerRedirecting>();
+        services.AddSingleton<ISIServerUtils, SIServerUtils>();
 
     }
 }

@@ -15,17 +15,15 @@ public class SIStreaming : ISIStreaming
         _bsStreamVideo = bsStreamVideo;
     }
 
-    public async Task<bool> StartStreaming()
+    public async Task StartStreaming()
     {
         try
         {
             await _bsStreamVideo.StreamVideo();
         }
-        catch (System.Exception ex)
+        catch
         {
-            Console.WriteLine("Error : " + ex);
-            return false;
+            Console.WriteLine("Error : server disconected");
         }
-        return true;
     }
 }

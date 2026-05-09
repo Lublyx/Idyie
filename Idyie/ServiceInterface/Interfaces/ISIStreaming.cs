@@ -6,5 +6,5 @@ namespace ServiceInterface.Interfaces;
 
 public interface ISIStreaming
 {
-    public Task<bool> StartStreaming();
+    public Task StartStreaming();
 }

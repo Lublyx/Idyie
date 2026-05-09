@@ -29,6 +29,8 @@ public class BSStreamVideo : IBSStreamVideo
         NetworkStream stream = tcpClient.GetStream();
 
         CancellationTokenSource cts = new CancellationTokenSource();
+        TaskCompletionSource awaitTask = new TaskCompletionSource();
+
 
         await _bsVideoRecording.StartRecording(async data =>
         {
@@ -40,10 +42,19 @@ public class BSStreamVideo : IBSStreamVideo
                 await stream.WriteAsync(size);
                 await stream.WriteAsync(data.Pixels);
             }
+            catch
+            {
+                await cts.CancelAsync();
+                awaitTask.TrySetException(new Exception("Server disconected"));
+            }
             finally
             {
                 _sendThrottle.Release();
             }
         }, cts.Token);
+
+        await awaitTask.Task;
+        tcpClient.Dispose();
+        cts.Dispose();
     }
 }
