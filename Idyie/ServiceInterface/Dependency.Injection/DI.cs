@@ -11,9 +11,10 @@ public static class DI
 
     public static void Resolve(this IServiceCollection services)
     {
-        services.AddSingleton<IVideoRecording, VideoRecording>();
-        services.AddSingleton<IStreaming, Streaming>();
-        services.AddSingleton<IFacialRecognition, FacialRecognition>();
+        services.AddSingleton<IBSVideoRecording, BSVideoRecording>();
+        services.AddSingleton<ISIStreaming, SIStreaming>();
+        services.AddSingleton<IBSFacialRecognition, BSFacialRecognition>();
+        services.AddSingleton<IBSStreamVideo, BSStreamVideo>();
 
     }
 }

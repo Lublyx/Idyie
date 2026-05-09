@@ -9,7 +9,7 @@ namespace Idyie.Tcp;
 public class Server
 {
 
-    private readonly IStreaming _streaming;
+    private readonly ISIStreaming _streaming;
     private const string _ipAdress = "127.0.0.1";
     private const int _portInput = 5001;
     private const int _portOutput = 5002;
@@ -20,7 +20,7 @@ public class Server
         SingleWriter = true
     });
 
-    public Server(IStreaming streaming)
+    public Server(ISIStreaming streaming)
     {
         _streaming = streaming;
     }
@@ -33,43 +33,48 @@ public class Server
         serverInput.Start();
         serverOutput.Start();
 
-        TcpClient clientInput = await serverInput.AcceptTcpClientAsync();
-        NetworkStream streamInput = clientInput.GetStream();
-
-        await Task.WhenAll(InputStreaming(streamInput), OutputStreaming(serverOutput));
+        await Task.WhenAll(InputStreaming(serverInput), OutputStreaming(serverOutput));
     }
 
-    private async Task InputStreaming(NetworkStream streamInput)
+    private async Task InputStreaming(TcpListener serverInput)
     {
-        byte[] bufferSize = new byte[4];
-        byte[] frameBuffer = new byte[680 * 480 * 4];
-
         while (true)
         {
+            TcpClient clientInput = await serverInput.AcceptTcpClientAsync();
+            NetworkStream streamInput = clientInput.GetStream();
+
+            byte[] bufferSize = new byte[4];
+            byte[] frameBuffer = new byte[680 * 480 * 4];
+
             try
             {
-
-                await ReadExectAsync(streamInput, bufferSize, 0, 4);
-                int frameSize = BitConverter.ToInt32(bufferSize, 0);
-
-                if (frameSize <= 0 || frameSize > 10_000_000)
+                while (true)
                 {
-                    Console.WriteLine($"Erreur : {frameSize}");
-                    break;
+
+                    await ReadExectAsync(streamInput, bufferSize, 0, 4);
+                    int frameSize = BitConverter.ToInt32(bufferSize, 0);
+
+                    if (frameSize <= 0 || frameSize > 10_000_000)
+                    {
+                        Console.WriteLine($"Erreur : {frameSize}");
+                        break;
+                    }
+
+                    if (frameBuffer.Length < frameSize)
+                        frameBuffer = new byte[frameSize];
+
+                    await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
+
+                    await _channel.Writer.WriteAsync((bufferSize[..4], frameBuffer[..frameSize], frameSize));
                 }
-
-                if (frameBuffer.Length < frameSize)
-                    frameBuffer = new byte[frameSize];
-
-                await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
-
-                await _channel.Writer.WriteAsync((bufferSize[..4], frameBuffer[..frameSize], frameSize));
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                _channel.Writer.Complete();
-                break;
+            }
+            finally
+            {
+                clientInput.Dispose();
             }
         }
     }
@@ -89,9 +94,12 @@ public class Server
                     await streamOutput.WriteAsync(frame.AsMemory(0, frameSize));
                 }
             }
-            catch (System.Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("Reciver Disconected");
+                throw new EndOfStreamException("Disconected", e);
+            }
+            finally
+            {
                 clientOutput.Dispose();
             }
         }
@@ -103,10 +111,11 @@ public class Server
 
         while (totalRead < count)
         {
+
             int read = await stream.ReadAsync(buffer, offset + totalRead, count - totalRead);
 
             if (read == 0)
-                Console.WriteLine("Disconected");
+                throw new EndOfStreamException("Disconected");
 
             totalRead += read;
         }

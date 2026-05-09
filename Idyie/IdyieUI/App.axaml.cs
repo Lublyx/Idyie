@@ -24,7 +24,7 @@ public partial class App : Application
 
         ServiceProvider services = collection.BuildServiceProvider();
 
-        IStreaming streaming = services.GetRequiredService<IStreaming>();
+        ISIStreaming streaming = services.GetRequiredService<ISIStreaming>();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow(streaming);

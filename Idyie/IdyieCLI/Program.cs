@@ -12,7 +12,7 @@ public static class Program
         ServiceCollection collection = new ServiceCollection();
         collection.Resolve();
 
-        App app = new App(collection.BuildServiceProvider().GetRequiredService<IStreaming>());
+        App app = new App(collection.BuildServiceProvider().GetRequiredService<ISIStreaming>());
         await app.Run();
     }
 }

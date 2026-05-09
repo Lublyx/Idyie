@@ -6,24 +6,26 @@ using ServiceInterface.Interfaces;
 
 namespace ServiceInterface.Services;
 
-public class Streaming : IStreaming
+public class SIStreaming : ISIStreaming
 {
-    private readonly IVideoRecording _videoRecording;
+    private readonly IBSStreamVideo _bsStreamVideo;
 
-    public Streaming(IVideoRecording videoRecording)
+    public SIStreaming(IBSStreamVideo bsStreamVideo)
     {
-        _videoRecording = videoRecording;
+        _bsStreamVideo = bsStreamVideo;
     }
 
-    public async Task StartStreaming(Action<AvaloniaVideoData> callback, CancellationToken token)
+    public async Task<bool> StartStreaming()
     {
         try
         {
-            await _videoRecording.StartRecording(callback, token);
+            await _bsStreamVideo.StreamVideo();
         }
         catch (System.Exception ex)
         {
             Console.WriteLine("Error : " + ex);
+            return false;
         }
+        return true;
     }
 }

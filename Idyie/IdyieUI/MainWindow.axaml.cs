@@ -14,19 +14,20 @@ using System.Net.Sockets;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Buffers;
+using System.IO;
 
 namespace IdyieUI;
 
 public partial class MainWindow : Avalonia.Controls.Window
 {
 
-    private readonly IStreaming _streaming;
+    private readonly ISIStreaming _streaming;
     private const string _ipAdress = "127.0.0.1";
     private const int _port = 5002;
     private TcpClient? _tcpClient;
     private bool _isRunning = false;
 
-    public MainWindow(IStreaming streaming)
+    public MainWindow(ISIStreaming streaming)
     {
         InitializeComponent();
         _streaming = streaming;
@@ -97,7 +98,7 @@ public partial class MainWindow : Avalonia.Controls.Window
                 int read = await stream.ReadAsync(buffer, offset, size - offset);
 
                 if (read == 0)
-                    Console.WriteLine("Disconected");
+                    throw new EndOfStreamException("Disconected");
 
                 offset += read;
             }
@@ -105,7 +106,6 @@ public partial class MainWindow : Avalonia.Controls.Window
         catch
         {
             Console.WriteLine("Flux closed");
-            stream.Close();
             _isRunning = false;
         }
     }

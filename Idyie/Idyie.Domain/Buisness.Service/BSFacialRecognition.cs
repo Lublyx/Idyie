@@ -4,7 +4,7 @@ using OpenCvSharp;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class FacialRecognition : IFacialRecognition
+public class BSFacialRecognition : IBSFacialRecognition
 {
     private CascadeClassifier? _cascadeClassifier;
     private CascadeClassifier? _cascadeClassifierProfile;

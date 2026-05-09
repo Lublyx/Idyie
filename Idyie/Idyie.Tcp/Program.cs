@@ -18,7 +18,7 @@ public static class Program
 
         collection.AddSingleton<Server>();
 
-        Server server = new Server(collection.BuildServiceProvider().GetRequiredService<IStreaming>());
+        Server server = new Server(collection.BuildServiceProvider().GetRequiredService<ISIStreaming>());
 
         await server.StartServer();
     }
