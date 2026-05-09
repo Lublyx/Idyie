@@ -13,20 +13,19 @@ public class App
 
     public async Task Run()
     {
-        DateTime lastTry = DateTime.Now;
-
-        TaskCompletionSource awaitTask = new TaskCompletionSource();
         while (true)
         {
-            if (lastTry < DateTime.Now.AddSeconds(-10))
+            try
             {
-                if (!await _siStreaming.StartStreaming())
-                    awaitTask.SetResult();
-                
-                await awaitTask.Task;
-                lastTry = DateTime.Now;
-                awaitTask = new TaskCompletionSource();
+                await _siStreaming.StartStreaming();
             }
+            catch (Exception e)
+            {
+                throw new EndOfStreamException(e.Message);
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(10));
         }
     }
 }
+
