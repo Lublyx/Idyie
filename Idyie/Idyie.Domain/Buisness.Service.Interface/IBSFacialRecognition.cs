@@ -5,5 +5,5 @@ namespace Idyie.Domain.Buisness.Service.Interface;
 
 public interface IBSFacialRecognition
 {
-    public void Analyse(Mat frame, Mat gray);
+    public byte[] Analyse(byte[] frameBuffer, int frameSize);
 }

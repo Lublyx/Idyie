@@ -8,12 +8,19 @@ namespace Idyie.Domain.Buisness.Service;
 public class BSServerRedirecting : IBSServerRedirecting
 {
 
+    private readonly IBSFacialRecognition _bsFacialRecognition;
     private readonly Channel<(byte[] size, byte[] frame, int frameSize)> _channel = Channel.CreateBounded<(byte[], byte[], int)>(new BoundedChannelOptions(1)
     {
         FullMode = BoundedChannelFullMode.DropOldest,
         SingleReader = true,
         SingleWriter = true
     });
+
+    public BSServerRedirecting(IBSFacialRecognition bsFacialRecognition)
+    {
+        _bsFacialRecognition = bsFacialRecognition;
+    }
+
     public async Task InputStreaming(TcpListener serverInput)
     {
         while (true)
@@ -43,7 +50,12 @@ public class BSServerRedirecting : IBSServerRedirecting
 
                     await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
 
-                    await _channel.Writer.WriteAsync((bufferSize[..4], frameBuffer[..frameSize], frameSize));
+                    byte[] analysedFrame = _bsFacialRecognition.Analyse(frameBuffer, frameSize);
+                    int analysedFrameSize = analysedFrame.Length;
+
+                    byte[] newByteSize = BitConverter.GetBytes(analysedFrameSize);
+
+                    await _channel.Writer.WriteAsync((newByteSize, analysedFrame, analysedFrameSize));
                 }
             }
             catch

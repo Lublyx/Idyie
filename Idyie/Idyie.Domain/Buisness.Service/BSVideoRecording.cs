@@ -45,8 +45,6 @@ public class BSVideoRecording : IBSVideoRecording
                 _videoCapture!.Read(frame);
                 if (frame.Empty()) continue;
 
-                // _facialRecognition.Analyse(frame, gray);
-
                 Cv2.CvtColor(frame, bgra, ColorConversionCodes.BGR2BGRA);
 
                 AvaloniaVideoData videoData = BuildAvaloniaVideoData(bgra);
