@@ -28,7 +28,7 @@ public class BSServerRedirecting : IBSServerRedirecting
             TcpClient clientInput = await serverInput.AcceptTcpClientAsync();
             NetworkStream streamInput = clientInput.GetStream();
 
-            byte[] bufferSize = new byte[4];
+            byte[] bufferSize = new byte[12];
             byte[] frameBuffer = new byte[680 * 480 * 4];
 
             try
@@ -36,8 +36,10 @@ public class BSServerRedirecting : IBSServerRedirecting
                 while (true)
                 {
 
-                    await ReadExectAsync(streamInput, bufferSize, 0, 4);
-                    int frameSize = BitConverter.ToInt32(bufferSize, 0);
+                    await ReadExectAsync(streamInput, bufferSize, 0, 12);
+                    int frameW = BitConverter.ToInt32(bufferSize, 0);
+                    int frameH = BitConverter.ToInt32(bufferSize, 4);
+                    int frameSize = BitConverter.ToInt32(bufferSize, 8);
 
                     if (frameSize <= 0 || frameSize > 10_000_000)
                     {
@@ -50,7 +52,7 @@ public class BSServerRedirecting : IBSServerRedirecting
 
                     await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
 
-                    byte[] analysedFrame = _bsFacialRecognition.Analyse(frameBuffer, frameSize);
+                    byte[] analysedFrame = _bsFacialRecognition.Analyse(frameBuffer, frameSize, frameW, frameH);
                     int analysedFrameSize = analysedFrame.Length;
 
                     byte[] newByteSize = BitConverter.GetBytes(analysedFrameSize);

@@ -8,16 +8,10 @@ namespace Idyie.Domain.Buisness.Service;
 
 public class BSVideoRecording : IBSVideoRecording
 {
-    private readonly IBSFacialRecognition _facialRecognition;
     private VideoCapture? _videoCapture;
     private bool _isRunning = false;
     private Action<AvaloniaVideoData>? _callback;
     private CancellationToken? _token;
-
-    public BSVideoRecording(IBSFacialRecognition facialRecognition)
-    {
-        _facialRecognition = facialRecognition;
-    }
 
     public async Task StartRecording(Action<AvaloniaVideoData> callback, CancellationToken token)
     {

@@ -1,37 +1,43 @@
 using System;
 using System.Runtime.InteropServices;
 using Idyie.Domain.Buisness.Service.Interface;
+using Idyie.Dto;
 using OpenCvSharp;
 
 namespace Idyie.Domain.Buisness.Service;
 
 public class BSFacialRecognition : IBSFacialRecognition
 {
+    private readonly IBSObjectDetection _bsObjectDetection;
     private CascadeClassifier? _cascadeClassifier;
     private CascadeClassifier? _cascadeClassifierProfile;
 
-    public BSFacialRecognition()
+    public BSFacialRecognition(IBSObjectDetection bsObjectDetection)
     {
+        _bsObjectDetection = bsObjectDetection;
         Load();
     }
 
-    public byte[] Analyse(byte[] frameBuffer, int frameSize)
+    public byte[] Analyse(byte[] frameBuffer, int frameSize, int w, int h)
     {
+        using Mat brg = new Mat();
         using Mat gray = new Mat();
-        using Mat frame = new Mat(480, 640, MatType.CV_8UC4);
+        using Mat frame = new Mat(h, w, MatType.CV_8UC4);
         try
         {
             Marshal.Copy(frameBuffer, 0, frame.Data, frameSize);
 
-            Cv2.CvtColor(frame, gray, ColorConversionCodes.BGRA2GRAY);
+            Cv2.CvtColor(frame, brg, ColorConversionCodes.BGRA2BGR);
+            Cv2.CvtColor(brg, gray, ColorConversionCodes.BGR2GRAY);
             Cv2.EqualizeHist(gray, gray);
 
-            DetectFace(frame, gray);
+            DetectFace(brg, gray);
+            DetectObjects(brg, brg);
 
             using Mat bgra = new Mat();
-            Cv2.CvtColor(frame, bgra, ColorConversionCodes.BGR2BGRA);
+            Cv2.CvtColor(brg, bgra, ColorConversionCodes.BGR2BGRA);
 
-            byte[] result = new byte[640 * 480 * 4];
+            byte[] result = new byte[w * h * 4];
             Marshal.Copy(bgra.Data, result, 0, result.Length);
 
             return result;
@@ -56,6 +62,19 @@ public class BSFacialRecognition : IBSFacialRecognition
 
             foreach (OpenCvSharp.Rect face in faces)
                 Cv2.Rectangle(frame, face, Scalar.Yellow, 2);
+    }
+
+    private void DetectObjects(Mat frame, Mat brg)
+    {
+        List<ObjectDetected> objectDetecteds = _bsObjectDetection.DetectObjects(brg);
+
+        foreach (ObjectDetected obj in objectDetecteds)
+        {
+            if (!obj.ToDisplay) continue;
+            Rect rect = new Rect(obj.X, obj.Y, obj.W, obj.H);
+            Cv2.Rectangle(frame, rect, Scalar.White, 2);
+            Cv2.PutText(frame, $"{obj.Label} : {obj.Score:P0}", new OpenCvSharp.Point(obj.X, obj.Y - 10), HersheyFonts.HersheySimplex, 0.6, Scalar.White, 2);
+        }
     }
 
     private void Load()

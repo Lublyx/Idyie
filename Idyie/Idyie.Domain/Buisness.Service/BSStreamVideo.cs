@@ -37,8 +37,11 @@ public class BSStreamVideo : IBSStreamVideo
             if (!await _sendThrottle.WaitAsync(0)) return;
             try
             {
-
+                byte[] wBytes = BitConverter.GetBytes(data.W);
+                byte[] hBytes = BitConverter.GetBytes(data.H);
                 byte[] size = BitConverter.GetBytes(data.Pixels.Length);
+                await stream.WriteAsync(wBytes);
+                await stream.WriteAsync(hBytes);
                 await stream.WriteAsync(size);
                 await stream.WriteAsync(data.Pixels);
             }
