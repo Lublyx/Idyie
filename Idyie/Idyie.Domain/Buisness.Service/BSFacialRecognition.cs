@@ -11,6 +11,8 @@ public class BSFacialRecognition : IBSFacialRecognition
     private readonly IBSObjectDetection _bsObjectDetection;
     private CascadeClassifier? _cascadeClassifier;
     private CascadeClassifier? _cascadeClassifierProfile;
+    private EmotionStatus _emotionStatus;
+    private DateTime _emotionTimeOut = DateTime.Now;
 
     public BSFacialRecognition(IBSObjectDetection bsObjectDetection)
     {
@@ -31,8 +33,8 @@ public class BSFacialRecognition : IBSFacialRecognition
             Cv2.CvtColor(brg, gray, ColorConversionCodes.BGR2GRAY);
             Cv2.EqualizeHist(gray, gray);
 
-            DetectFace(brg, gray);
             DetectObjects(brg, brg);
+            DetectFace(brg, gray);
 
             using Mat bgra = new Mat();
             Cv2.CvtColor(brg, bgra, ColorConversionCodes.BGR2BGRA);
@@ -54,23 +56,32 @@ public class BSFacialRecognition : IBSFacialRecognition
         OpenCvSharp.Rect[] facesDefault = _cascadeClassifier!.DetectMultiScale(
                 gray, scaleFactor: 1.1, minNeighbors: 5);
 
-            OpenCvSharp.Rect[] facesProfile = _cascadeClassifierProfile!.DetectMultiScale(
-                gray, scaleFactor: 1.1, minNeighbors: 5);
+        OpenCvSharp.Rect[] facesProfile = _cascadeClassifierProfile!.DetectMultiScale(
+            gray, scaleFactor: 1.1, minNeighbors: 5);
 
-            IList<OpenCvSharp.Rect> faces = [.. facesDefault, .. facesProfile];
+        IList<OpenCvSharp.Rect> faces = [.. facesDefault, .. facesProfile];
 
 
-            foreach (OpenCvSharp.Rect face in faces)
-                Cv2.Rectangle(frame, face, Scalar.Yellow, 2);
+        foreach (OpenCvSharp.Rect face in faces)
+            Cv2.Rectangle(frame, face, _emotionStatus == EmotionStatus.Danger ? Scalar.Red : Scalar.Yellow, 2);
     }
 
     private void DetectObjects(Mat frame, Mat brg)
     {
         List<ObjectDetected> objectDetecteds = _bsObjectDetection.DetectObjects(brg);
 
+        if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
+
         foreach (ObjectDetected obj in objectDetecteds)
         {
+            if (obj.Label == "cell phone")
+            {
+                _emotionStatus = EmotionStatus.Danger;
+                _emotionTimeOut = DateTime.Now;
+            }
+            else if (_emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
             if (!obj.ToDisplay) continue;
+
             Rect rect = new Rect(obj.X, obj.Y, obj.W, obj.H);
             Cv2.Rectangle(frame, rect, Scalar.White, 2);
             Cv2.PutText(frame, $"{obj.Label} : {obj.Score:P0}", new OpenCvSharp.Point(obj.X, obj.Y - 10), HersheyFonts.HersheySimplex, 0.6, Scalar.White, 2);

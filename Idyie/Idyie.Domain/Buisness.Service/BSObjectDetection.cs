@@ -172,7 +172,7 @@ public class BSObjectDetection : IBSObjectDetection
                 Y = (int)((cy - newH / 2) * scaleY),
                 W = (int)(newW * scaleX),
                 H = (int)(newH * scaleY),
-                ToDisplay = _cocoLabels[classId] == "knife"
+                ToDisplay = _cocoLabels[classId] == "cell phone"
             });
         }
         return ApplyNMS(objectDetecteds, 0.45f);
