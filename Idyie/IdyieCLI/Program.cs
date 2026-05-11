@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using ServiceInterface.Dependency.Injection;
 using ServiceInterface.Interfaces;
-using VisioForge.DotNet.VideoCapture;
 namespace IdyieCLI;
 
 public static class Program

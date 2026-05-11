@@ -1,12 +1,10 @@
 using System;
 using Idyie.Dto;
-using ServiceInterface.Services;
 
-namespace ServiceInterface.Interfaces;
+namespace Idyie.Domain.Buisness.Service.Interface;
 
-public interface ISIStreaming
+public interface IBSVideoViewer
 {
-    public Task StartStreaming();
 
     public Task StartVideoViewer(Action<AvaloniaVideoData> action, CancellationToken token);
 

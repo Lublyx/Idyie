@@ -1,3 +1,4 @@
+using System.Net.Security;
 using Idyie.Domain.Buisness.Service;
 using Idyie.Domain.Buisness.Service.Interface;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ public static class DI
         services.AddSingleton<IBSStreamVideo, BSStreamVideo>();
         services.AddSingleton<IBSServerRedirecting, BSServerRedirecting>();
         services.AddSingleton<IBSObjectDetection, BSObjectDetection>();
+        services.AddSingleton<IBSVideoViewer, BSVideoViewer>();
 
         // SI
         services.AddSingleton<ISIStreaming, SIStreaming>();
