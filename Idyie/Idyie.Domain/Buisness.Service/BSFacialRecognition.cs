@@ -34,7 +34,7 @@ public class BSFacialRecognition : IBSFacialRecognition
             Cv2.EqualizeHist(gray, gray);
 
             DetectObjects(brg, brg);
-            DetectFace(brg, gray);
+            // DetectFace(brg, gray);
 
             using Mat bgra = new Mat();
             Cv2.CvtColor(brg, bgra, ColorConversionCodes.BGR2BGRA);
@@ -83,7 +83,7 @@ public class BSFacialRecognition : IBSFacialRecognition
             if (!obj.ToDisplay) continue;
 
             Rect rect = new Rect(obj.X, obj.Y, obj.W, obj.H);
-            Cv2.Rectangle(frame, rect, Scalar.White, 2);
+            Cv2.Rectangle(frame, rect, _emotionStatus == EmotionStatus.Danger ? Scalar.Red : Scalar.Yellow, 2);
             Cv2.PutText(frame, $"{obj.Label} : {obj.Score:P0}", new OpenCvSharp.Point(obj.X, obj.Y - 10), HersheyFonts.HersheySimplex, 0.6, Scalar.White, 2);
         }
     }
