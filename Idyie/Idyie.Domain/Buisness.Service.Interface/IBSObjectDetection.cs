@@ -5,5 +5,5 @@ namespace Idyie.Domain.Buisness.Service.Interface;
 
 public interface IBSObjectDetection
 {
-    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.8f);
+    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.75f);
 }

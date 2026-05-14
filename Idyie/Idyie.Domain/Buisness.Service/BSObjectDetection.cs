@@ -102,7 +102,7 @@ public class BSObjectDetection : IBSObjectDetection
         _inferenceSession = new InferenceSession(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, MODEL_PATH));
     }
 
-    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.8f)
+    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.75f)
     {
         DenseTensor<float> tensor = MatToTensor(frame);
 
@@ -172,7 +172,7 @@ public class BSObjectDetection : IBSObjectDetection
                 Y = (int)((cy - newH / 2) * scaleY),
                 W = (int)(newW * scaleX),
                 H = (int)(newH * scaleY),
-                ToDisplay = true
+                ToDisplay = Status.DangerObjects.Contains<string>(_cocoLabels[classId]) || _cocoLabels[classId] == "person"
             });
         }
         return ApplyNMS(objectDetecteds, 0.45f);
