@@ -6,7 +6,7 @@ using OpenCvSharp;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class BSFacialRecognition : IBSFacialRecognition
+public class BSRecognition : IBSRecognition
 {
     private readonly IBSObjectDetection _bsObjectDetection;
     private CascadeClassifier? _cascadeClassifier;
@@ -14,7 +14,7 @@ public class BSFacialRecognition : IBSFacialRecognition
     private string _emotionStatus;
     private DateTime _emotionTimeOut = DateTime.Now;
 
-    public BSFacialRecognition(IBSObjectDetection bsObjectDetection)
+    public BSRecognition(IBSObjectDetection bsObjectDetection)
     {
         _bsObjectDetection = bsObjectDetection;
         _emotionStatus = Status.Emotions.Normal;

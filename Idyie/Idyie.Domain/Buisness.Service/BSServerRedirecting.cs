@@ -8,7 +8,7 @@ namespace Idyie.Domain.Buisness.Service;
 public class BSServerRedirecting : IBSServerRedirecting
 {
 
-    private readonly IBSFacialRecognition _bsFacialRecognition;
+    private readonly IBSRecognition _bsFacialRecognition;
     private readonly Channel<(byte[] size, byte[] frame, int frameSize)> _channel = Channel.CreateBounded<(byte[], byte[], int)>(new BoundedChannelOptions(1)
     {
         FullMode = BoundedChannelFullMode.DropOldest,
@@ -16,7 +16,7 @@ public class BSServerRedirecting : IBSServerRedirecting
         SingleWriter = true
     });
 
-    public BSServerRedirecting(IBSFacialRecognition bsFacialRecognition)
+    public BSServerRedirecting(IBSRecognition bsFacialRecognition)
     {
         _bsFacialRecognition = bsFacialRecognition;
     }

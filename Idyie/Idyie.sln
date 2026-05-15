@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idyie.Dto", "Idyie.Dto\Idyi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idyie.Tcp", "Idyie.Tcp\Idyie.Tcp.csproj", "{23A256E5-BD52-4BF4-B812-A2B2368C265F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Idyie.Dao", "Idyie.Dao\Idyie.Dao.csproj", "{077633F0-549A-4147-83F2-B0B753944AA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +96,18 @@ Global
 		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x64.Build.0 = Release|Any CPU
 		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x86.ActiveCfg = Release|Any CPU
 		{23A256E5-BD52-4BF4-B812-A2B2368C265F}.Release|x86.Build.0 = Release|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Debug|x64.Build.0 = Debug|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Debug|x86.Build.0 = Debug|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Release|x64.ActiveCfg = Release|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Release|x64.Build.0 = Release|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Release|x86.ActiveCfg = Release|Any CPU
+		{077633F0-549A-4147-83F2-B0B753944AA0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

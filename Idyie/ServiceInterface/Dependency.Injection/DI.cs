@@ -14,7 +14,7 @@ public static class DI
     {
         // BS
         services.AddSingleton<IBSVideoRecording, BSVideoRecording>();
-        services.AddSingleton<IBSFacialRecognition, BSFacialRecognition>();
+        services.AddSingleton<IBSRecognition, BSRecognition>();
         services.AddSingleton<IBSStreamVideo, BSStreamVideo>();
         services.AddSingleton<IBSServerRedirecting, BSServerRedirecting>();
         services.AddSingleton<IBSObjectDetection, BSObjectDetection>();
