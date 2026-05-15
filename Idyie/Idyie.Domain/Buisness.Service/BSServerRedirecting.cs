@@ -8,7 +8,7 @@ namespace Idyie.Domain.Buisness.Service;
 public class BSServerRedirecting : IBSServerRedirecting
 {
 
-    private readonly IBSRecognition _bsFacialRecognition;
+    private readonly IBSRecognition _bsRecognition;
     private readonly Channel<(byte[] size, byte[] frame, int frameSize)> _channel = Channel.CreateBounded<(byte[], byte[], int)>(new BoundedChannelOptions(1)
     {
         FullMode = BoundedChannelFullMode.DropOldest,
@@ -16,9 +16,9 @@ public class BSServerRedirecting : IBSServerRedirecting
         SingleWriter = true
     });
 
-    public BSServerRedirecting(IBSRecognition bsFacialRecognition)
+    public BSServerRedirecting(IBSRecognition bsRecognition)
     {
-        _bsFacialRecognition = bsFacialRecognition;
+        _bsRecognition = bsRecognition;
     }
 
     public async Task InputStreaming(TcpListener serverInput)
@@ -28,18 +28,16 @@ public class BSServerRedirecting : IBSServerRedirecting
             TcpClient clientInput = await serverInput.AcceptTcpClientAsync();
             NetworkStream streamInput = clientInput.GetStream();
 
-            byte[] bufferSize = new byte[12];
-            byte[] frameBuffer = new byte[680 * 480 * 4];
+            byte[] bufferSize = new byte[4];
 
             try
             {
                 while (true)
                 {
 
-                    await ReadExectAsync(streamInput, bufferSize, 0, 12);
-                    int frameW = BitConverter.ToInt32(bufferSize, 0);
-                    int frameH = BitConverter.ToInt32(bufferSize, 4);
-                    int frameSize = BitConverter.ToInt32(bufferSize, 8);
+                    await ReadExectAsync(streamInput, bufferSize, 0, 4);
+                    int frameSize = BitConverter.ToInt32(bufferSize, 0);
+                    byte[] frameBuffer = new byte[frameSize];
 
                     if (frameSize <= 0 || frameSize > 10_000_000)
                     {
@@ -52,7 +50,7 @@ public class BSServerRedirecting : IBSServerRedirecting
 
                     await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
 
-                    byte[] analysedFrame = _bsFacialRecognition.Analyse(frameBuffer, frameSize, frameW, frameH);
+                    byte[] analysedFrame = _bsRecognition.Analyse(frameBuffer, frameSize);
                     int analysedFrameSize = analysedFrame.Length;
 
                     byte[] newByteSize = BitConverter.GetBytes(analysedFrameSize);

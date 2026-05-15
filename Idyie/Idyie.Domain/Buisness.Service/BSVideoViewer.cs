@@ -2,8 +2,10 @@ using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using Idyie.Domain.Buisness.Service.Interface;
 using Idyie.Dto;
+using OpenCvSharp;
 
 namespace Idyie.Domain.Buisness.Service;
 
@@ -48,14 +50,19 @@ public class BSVideoViewer : IBSVideoViewer
             {
 
                 await ReadExectAsync(stream, pixels, frameSize);
+                Mat decoded = Cv2.ImDecode(pixels[..frameSize], ImreadModes.Color);
+                if (decoded.Empty()) continue;
+                Mat bgra = new Mat();
+                Cv2.CvtColor(decoded, bgra, ColorConversionCodes.BGR2BGRA);
 
                 AvaloniaVideoData avaloniaVideoData = new AvaloniaVideoData()
                 {
-                    W = 640,
-                    H = 480,
-                    Size = frameSize,
-                    Pixels = pixels
+                    W = bgra.Width,
+                    H = bgra.Height,
+                    Size = bgra.Width * bgra.Height * 4,
+                    Pixels = new byte[bgra.Width * bgra.Height * 4]
                 };
+                Marshal.Copy(bgra.Data, avaloniaVideoData.Pixels, 0, avaloniaVideoData.Size);
 
                 action?.Invoke(avaloniaVideoData);
             }

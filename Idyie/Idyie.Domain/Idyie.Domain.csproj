@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Idyie.Dao/Idyie.Dao.csproj" />
     <ProjectReference Include="../Idyie.Dto/Idyie.Dto.csproj" />
   </ItemGroup>
 

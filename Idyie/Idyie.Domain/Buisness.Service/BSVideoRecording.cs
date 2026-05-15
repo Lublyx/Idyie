@@ -58,14 +58,16 @@ public class BSVideoRecording : IBSVideoRecording
 
     private AvaloniaVideoData BuildAvaloniaVideoData(Mat bgra)
     {
+        Mat bgr = new Mat();
+        Cv2.CvtColor(bgra, bgr, ColorConversionCodes.BGRA2BGR);
+        Cv2.ImEncode(".jpg", bgr, out byte[] jpg);
         AvaloniaVideoData videoData = new AvaloniaVideoData()
         {
             W = bgra.Width,
             H = bgra.Height,
-            Size = bgra.Width * bgra.Height * 4,
-            Pixels = new byte[bgra.Width * bgra.Height * 4],
+            Size = jpg.Length,
+            Pixels = jpg 
         };
-        Marshal.Copy(bgra.Data, videoData.Pixels, 0, videoData.Size);
 
         return videoData;
     }

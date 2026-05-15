@@ -21,29 +21,22 @@ public class BSRecognition : IBSRecognition
         Load();
     }
 
-    public byte[] Analyse(byte[] frameBuffer, int frameSize, int w, int h)
+    public byte[] Analyse(byte[] frameBuffer, int frameSize)
     {
         using Mat brg = new Mat();
         using Mat gray = new Mat();
-        using Mat frame = new Mat(h, w, MatType.CV_8UC4);
+        using Mat frame = Cv2.ImDecode(frameBuffer, ImreadModes.Color);
         try
         {
-            Marshal.Copy(frameBuffer, 0, frame.Data, frameSize);
-
-            Cv2.CvtColor(frame, brg, ColorConversionCodes.BGRA2BGR);
-            Cv2.CvtColor(brg, gray, ColorConversionCodes.BGR2GRAY);
+            Cv2.CvtColor(frame, gray, ColorConversionCodes.BGR2GRAY);
             Cv2.EqualizeHist(gray, gray);
 
-            DetectObjects(brg, brg);
+            byte[] jpgImage = frame.ImEncode(".jpg");
+            DetectObjects(frame, frame, jpgImage);
             // DetectFace(brg, gray);
 
-            using Mat bgra = new Mat();
-            Cv2.CvtColor(brg, bgra, ColorConversionCodes.BGR2BGRA);
-
-            byte[] result = new byte[w * h * 4];
-            Marshal.Copy(bgra.Data, result, 0, result.Length);
-
-            return result;
+            Cv2.ImEncode(".jpg", frame, out byte[] jpg);
+            return jpg;
         }
         catch (Exception e)
         {
@@ -67,12 +60,13 @@ public class BSRecognition : IBSRecognition
             Cv2.Rectangle(frame, face, _emotionStatus == Status.Emotions.Danger ? Scalar.Red : Scalar.Yellow, 2);
     }
 
-    private void DetectObjects(Mat frame, Mat brg)
+    private void DetectObjects(Mat frame, Mat brg, byte[] jpgImage)
     {
+
         List<ObjectDetected> objectDetecteds = _bsObjectDetection.DetectObjects(brg);
 
         // if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
-        
+
         foreach (ObjectDetected obj in objectDetecteds)
         {
             if (Status.DangerObjects.Contains<string>(obj.Label))
