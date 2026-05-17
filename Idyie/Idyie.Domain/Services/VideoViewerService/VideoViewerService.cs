@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.Net.Sockets;
 using Idyie.Domain.Ports.Output;
 using Idyie.Domain.ValueObjects;
@@ -15,10 +16,9 @@ public class VideoViewerService : IVideoViewerService
         _videoConverter = videoConverter;
     }
 
-    public async Task ReadVideoData(Action<VideoData> action, NetworkStream stream)
+    public async Task ReadVideoData(Action<VideoData> action, NetworkStream stream, byte[] sizeBuffer, bool isRunning)
     {
-        byte[] sizeBuffer = new byte[4];
-        await ReadExectAsync(stream, sizeBuffer, 4);
+        await ReadExectAsync(stream, sizeBuffer, 4, isRunning);
         int frameSize = BitConverter.ToInt32(sizeBuffer, 0);
 
         if (frameSize <= 0 || frameSize > 10_000_000)
@@ -31,8 +31,8 @@ public class VideoViewerService : IVideoViewerService
 
         try
         {
-            await ReadExectAsync(stream, pixels, frameSize);
-            
+            await ReadExectAsync(stream, pixels, frameSize, isRunning);
+
             action?.Invoke(_videoConverter.MatToVideoData(pixels, frameSize));
         }
         finally
@@ -41,13 +41,13 @@ public class VideoViewerService : IVideoViewerService
         }
     }
 
-    private async Task ReadExectAsync(NetworkStream stream, byte[] buffer, int size)
+    private async Task ReadExectAsync(NetworkStream stream, byte[] buffer, int size, bool isRunning)
     {
         try
         {
             int offset = 0;
 
-            while (offset < size)
+            while (offset < size && isRunning)
             {
                 int read = await stream.ReadAsync(buffer, offset, size - offset);
 
@@ -60,6 +60,7 @@ public class VideoViewerService : IVideoViewerService
         catch
         {
             Console.WriteLine("Flux closed");
+            isRunning = false;
         }
     }
 }

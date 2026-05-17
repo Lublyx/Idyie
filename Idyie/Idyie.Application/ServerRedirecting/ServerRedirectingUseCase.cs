@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading.Channels;
 using Idyie.Domain.Ports.Input;
@@ -11,6 +12,12 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
 
     private readonly IRecognition _recognition;
     private readonly Channel<(byte[] size, byte[] frame, int frameSize)> _channel = Channel.CreateBounded<(byte[], byte[], int)>(new BoundedChannelOptions(1)
+    {
+        FullMode = BoundedChannelFullMode.DropOldest,
+        SingleReader = true,
+        SingleWriter = true
+    });
+    private readonly Channel<(byte[] frameBuffer, int frameSize)> _rowChannel = Channel.CreateBounded<(byte[], int)>(new BoundedChannelOptions(1)
     {
         FullMode = BoundedChannelFullMode.DropOldest,
         SingleReader = true,
@@ -30,12 +37,12 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
             NetworkStream streamInput = clientInput.GetStream();
 
             byte[] bufferSize = new byte[4];
+            _ = Task.Run(AnalyseAsync);
 
             try
             {
                 while (true)
                 {
-
                     await ReadExectAsync(streamInput, bufferSize, 0, 4);
                     int frameSize = BitConverter.ToInt32(bufferSize, 0);
                     byte[] frameBuffer = new byte[frameSize];
@@ -51,12 +58,8 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
 
                     await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
 
-                    byte[] analysedFrame = _recognition.Analyse(frameBuffer, frameSize);
-                    int analysedFrameSize = analysedFrame.Length;
+                    await _rowChannel.Writer.WriteAsync((frameBuffer[..frameSize], frameSize));
 
-                    byte[] newByteSize = BitConverter.GetBytes(analysedFrameSize);
-
-                    await _channel.Writer.WriteAsync((newByteSize, analysedFrame, analysedFrameSize));
                 }
             }
             catch
@@ -67,6 +70,18 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
             {
                 clientInput.Dispose();
             }
+        }
+    }
+
+    private async Task AnalyseAsync()
+    {
+        await foreach (var (buffer, size) in _rowChannel.Reader.ReadAllAsync())
+        {
+            byte[] analysedFrame = _recognition.Analyse(buffer, size);
+            int analysedFrameSize = analysedFrame.Length;
+            byte[] newByteSize = BitConverter.GetBytes(analysedFrameSize);
+
+            await _channel.Writer.WriteAsync((newByteSize, analysedFrame, analysedFrameSize));
         }
     }
 
@@ -81,8 +96,12 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
             {
                 await foreach (var (size, frame, frameSize) in _channel.Reader.ReadAllAsync())
                 {
+                    long writeStart = Stopwatch.GetTimestamp();
                     await streamOutput.WriteAsync(size);
                     await streamOutput.WriteAsync(frame.AsMemory(0, frameSize));
+                    long writeEnd = Stopwatch.GetTimestamp();
+
+                    Console.WriteLine($"[SERVER] Write: {(writeEnd - writeStart) / 10000}ms | FrameSize: {frameSize}b");
                 }
             }
             catch

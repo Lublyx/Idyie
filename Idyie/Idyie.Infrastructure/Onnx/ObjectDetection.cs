@@ -13,6 +13,9 @@ public class ObjectDetection : IObjectDetection
 
     private const string MODEL_PATH = "yolov8s.onnx";
     private readonly InferenceSession _inferenceSession;
+    private readonly float[] _data = new float[1 * 3 * 640 * 640];
+    private readonly DenseTensor<float> _tensor;
+    private List<ObjectDetected> _objectDetecteds = new();
     private readonly string[] _cocoLabels = {
     "person",
     "bicycle",
@@ -97,13 +100,15 @@ public class ObjectDetection : IObjectDetection
 
     public ObjectDetection()
     {
-        _inferenceSession = new InferenceSession(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, MODEL_PATH));
+        _tensor = new DenseTensor<float>(_data, new[] { 1, 3, 640, 640 });
+        var opts = new SessionOptions();
+        opts.AppendExecutionProvider_CPU();
+
+        _inferenceSession = new InferenceSession(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, MODEL_PATH), opts);
     }
 
-    public List<ObjectDetected> DetectObjects(byte[] frameData, float threshold = 0.75f)
+    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.75f)
     {
-        Mat frame = Cv2.ImDecode(frameData, ImreadModes.Color);
-
         DenseTensor<float> tensor = MatToTensor(frame);
 
         List<NamedOnnxValue> inputs = new List<NamedOnnxValue>
@@ -114,7 +119,7 @@ public class ObjectDetection : IObjectDetection
         using var results = _inferenceSession.Run(inputs);
         var data = results.FirstOrDefault();
         if (data == null) return [];
-        Tensor<float> output = data.AsTensor<float>();
+        float[] output = data.AsEnumerable<float>().ToArray();
 
         return ParseYoloOutput(output, frame.Width, frame.Height, threshold);
     }
@@ -130,33 +135,37 @@ public class ObjectDetection : IObjectDetection
             crop: false
         );
 
-        int[] size = [1, 3, 640, 640];
-        float[] data = new float[1 * 3 * 640 * 640];
-        Marshal.Copy(blob.Data, data, 0, data.Length);
+        Marshal.Copy(blob.Data, _data, 0, _data.Length);
 
-        return new DenseTensor<float>(data, size);
+        return _tensor;
     }
 
-    private List<ObjectDetected> ParseYoloOutput(Tensor<float> output, int w, int h, float threshold)
+    private List<ObjectDetected> ParseYoloOutput(float[] output, int w, int h, float threshold)
     {
-        List<ObjectDetected> objectDetecteds = new List<ObjectDetected>();
-        int numAnchors = output.Dimensions[2];
+        _objectDetecteds.Clear();
+        int strid = 8400;
         int numClasses = _cocoLabels.Length;
         float scaleX = (float)w / 640;
         float scaleY = (float)h / 640;
 
-        for (int i = 0; i < numAnchors; i++)
+        for (int i = 0; i < strid; i++)
         {
-            float cx = output[0, 0, i];
-            float cy = output[0, 1, i];
-            float newW = output[0, 2, i];
-            float newH = output[0, 3, i];
+            int baseCx = i;
+            int baseCy = i + strid;
+            int baseW = i + 2 * strid;
+            int baseH = i + 3 * strid;
+
+            float cx = output[baseCx];
+            float cy = output[baseCy];
+            float newW = output[baseW];
+            float newH = output[baseH];
 
             float maxScore = 0f;
             int classId = -1;
+            int classOffset = 4 * strid;
             for (int c = 0; c < numClasses; c++)
             {
-                float score = output[0, 4 + c, i];
+                float score = output[classOffset + c * strid + i];
                 if (score > maxScore)
                 {
                     maxScore = score;
@@ -166,7 +175,7 @@ public class ObjectDetection : IObjectDetection
 
             if (maxScore < threshold) continue;
 
-            objectDetecteds.Add(new ObjectDetected
+            _objectDetecteds.Add(new ObjectDetected
             {
                 Label = _cocoLabels[classId],
                 Score = maxScore,
@@ -178,24 +187,24 @@ public class ObjectDetection : IObjectDetection
                 EmotionTimeOut = DateTime.Now
             });
         }
-        return ApplyNMS(objectDetecteds, 0.45f);
+        return ApplyNMS(_objectDetecteds, 0.45f);
     }
 
     private List<ObjectDetected> ApplyNMS(List<ObjectDetected> detections, float iouThreshold)
     {
         // ─── Trie par score décroissant ───────────────────────────
-        var sorted = detections.OrderByDescending(d => d.Score).ToList();
+        detections.Sort((a, b) => b.Score.CompareTo(a.Score));
         var kept = new List<ObjectDetected>();
 
-        while (sorted.Count > 0)
+        while (detections.Count > 0)
         {
             // Garde la meilleure détection
-            var best = sorted[0];
+            var best = detections[0];
             kept.Add(best);
-            sorted.RemoveAt(0);
+            detections.RemoveAt(0);
 
             // Supprime toutes les boxes qui chevauchent trop
-            sorted.RemoveAll(d =>
+            detections.RemoveAll(d =>
                 d.Label == best.Label &&          // même classe
                 IoU(best, d) > iouThreshold);     // trop superposées
         }

@@ -20,41 +20,48 @@ public class StreamVideoUseCase : IStreamVideoUseCase
 
     public async Task StreamVideo()
     {
-        IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(_ipAdress), _port);
-        TcpClient tcpClient = new()
+        try
         {
-            NoDelay = true
-        };
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(_ipAdress), _port);
+            TcpClient tcpClient = new()
+            {
+                NoDelay = true
+            };
 
-        await tcpClient.ConnectAsync(endPoint);
-        NetworkStream stream = tcpClient.GetStream();
+            await tcpClient.ConnectAsync(endPoint);
+            NetworkStream stream = tcpClient.GetStream();
 
-        CancellationTokenSource cts = new CancellationTokenSource();
-        TaskCompletionSource awaitTask = new TaskCompletionSource();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            TaskCompletionSource awaitTask = new TaskCompletionSource();
 
 
-        await _videoRecording.StartRecording(async data =>
+            await _videoRecording.StartRecording(async data =>
+            {
+                if (!await _sendThrottle.WaitAsync(0)) return;
+                try
+                {
+                    byte[] size = BitConverter.GetBytes(data.Size);
+                    await stream.WriteAsync(size);
+                    await stream.WriteAsync(data.Pixels);
+                }
+                catch
+                {
+                    await cts.CancelAsync();
+                    awaitTask.TrySetException(new Exception("Server disconected"));
+                }
+                finally
+                {
+                    _sendThrottle.Release();
+                }
+            }, cts.Token);
+
+            await awaitTask.Task;
+            tcpClient.Dispose();
+            cts.Dispose();
+        }
+        catch (System.Exception)
         {
-            if (!await _sendThrottle.WaitAsync(0)) return;
-            try
-            {
-                byte[] size = BitConverter.GetBytes(data.Size);
-                await stream.WriteAsync(size);
-                await stream.WriteAsync(data.Pixels);
-            }
-            catch
-            {
-                await cts.CancelAsync();
-                awaitTask.TrySetException(new Exception("Server disconected"));
-            }
-            finally
-            {
-                _sendThrottle.Release();
-            }
-        }, cts.Token);
-
-        await awaitTask.Task;
-        tcpClient.Dispose();
-        cts.Dispose();
+            Console.WriteLine("Server disconected");
+        }
     }
 }

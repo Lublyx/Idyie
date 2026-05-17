@@ -15,6 +15,7 @@ public partial class MainWindow : Avalonia.Controls.Window
 {
 
     private readonly IVideoViewerUseCase _videoViwer;
+    private WriteableBitmap _bitmap;
 
 
     public MainWindow(IVideoViewerUseCase videoViwer)
@@ -49,16 +50,15 @@ public partial class MainWindow : Avalonia.Controls.Window
     {
         Dispatcher.UIThread.Post(() =>
                 {
-                    WriteableBitmap bitmap = new WriteableBitmap(
+                    _bitmap = new WriteableBitmap(
                         new PixelSize(videoData.W, videoData.H),
                         new Vector(96, 96),
                         PixelFormat.Bgra8888,
                         AlphaFormat.Opaque);
 
-
-                    using var buf = bitmap.Lock();
+                    using var buf = _bitmap.Lock();
                     Marshal.Copy(videoData.Pixels, 0, buf.Address, videoData.Size);
-                    imageVideo.Source = bitmap;
+                    imageVideo.Source = _bitmap;
 
                 }, DispatcherPriority.Render);
     }

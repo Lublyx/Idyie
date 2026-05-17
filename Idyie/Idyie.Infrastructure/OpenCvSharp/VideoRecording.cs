@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Idyie.Domain.Ports.Output;
 using Idyie.Domain.ValueObjects;
 using OpenCvSharp;
@@ -16,10 +17,11 @@ public class VideoRecording : IVideoRecording
         _callback = callback;
         _token = token;
 
-        
+
         _videoCapture = new VideoCapture(0, VideoCaptureAPIs.V4L2);
 
         _isRunning = true;
+
         Thread captureThread = new Thread(CaptureLoop) { IsBackground = true };
         captureThread.Start();
     }
@@ -27,20 +29,13 @@ public class VideoRecording : IVideoRecording
     private void CaptureLoop()
     {
         using Mat frame = new Mat();
-        using Mat gray = new Mat();
-        using Mat bgra = new Mat();
-
         while (_isRunning && !(bool)_token?.IsCancellationRequested!)
         {
             try
             {
                 _videoCapture!.Read(frame);
                 if (frame.Empty()) continue;
-
-                Cv2.CvtColor(frame, bgra, ColorConversionCodes.BGR2BGRA);
-
-                VideoData videoData = BuildAvaloniaVideoData(bgra);
-                
+                VideoData videoData = BuildVideoData(frame);
                 _callback?.Invoke(videoData);
 
                 Thread.Sleep(33);
@@ -54,17 +49,16 @@ public class VideoRecording : IVideoRecording
         _videoCapture?.Release();
     }
 
-    private VideoData BuildAvaloniaVideoData(Mat bgra)
+    private VideoData BuildVideoData(Mat bgra)
     {
-        Mat bgr = new Mat();
-        Cv2.CvtColor(bgra, bgr, ColorConversionCodes.BGRA2BGR);
-        Cv2.ImEncode(".jpg", bgr, out byte[] jpg);
+        using Mat bgr = new Mat();
+        Cv2.ImEncode(".jpg", bgra, out byte[] jpg);
         VideoData videoData = new VideoData()
         {
             W = bgra.Width,
             H = bgra.Height,
             Size = jpg.Length,
-            Pixels = jpg 
+            Pixels = jpg
         };
 
         return videoData;

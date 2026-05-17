@@ -34,12 +34,12 @@ public class VideoViewerUseCase : IVideoViewerUseCase
         await using NetworkStream stream = _tcpClient.GetStream();
 
         Console.WriteLine("Connected");
-
+        byte[] sizeBuffer = new byte[4];
 
         _isRunning = true;
         while (_isRunning)
         {
-            await _videoViewerService.ReadVideoData(action, stream);
+            await _videoViewerService.ReadVideoData(action, stream, sizeBuffer, _isRunning);
         }
     }
 

@@ -7,6 +7,6 @@ namespace Idyie.Domain.Services.VideoViewerService;
 public interface IVideoViewerService
 {
 
-    public Task ReadVideoData(Action<VideoData> action, NetworkStream stream);
+    public Task ReadVideoData(Action<VideoData> action, NetworkStream stream, byte[] sizeBuffer, bool isRunning);
 
 }

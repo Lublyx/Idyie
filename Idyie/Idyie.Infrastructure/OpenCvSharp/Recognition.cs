@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Idyie.Domain.Ports.Output;
 using Idyie.Domain.ValueObjects;
+using Idyie.Infrastructure.Onnx;
 using OpenCvSharp;
 
 namespace Idyie.Infrastructure.OpenCvSharp;
@@ -27,6 +29,8 @@ public class Recognition : IRecognition
             // DetectFace(brg, gray);
 
             Cv2.ImEncode(".jpg", frame, out byte[] jpg);
+            // Console.WriteLine($"[SERVER]  Face Analyse: {(endAlani - startAnali) / 10000}ms | FrameSize: {frameSize}b");
+
             return jpg;
         }
         catch (Exception e)
@@ -53,8 +57,13 @@ public class Recognition : IRecognition
 
     private void DetectObjects(Mat frame, Mat brg)
     {
+        double freq = Stopwatch.Frequency;
 
-        List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg.ImEncode(".jpg"));
+        long startObj = Stopwatch.GetTimestamp();
+
+        List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg);
+        long endObj = Stopwatch.GetTimestamp();
+
 
         // if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
 
@@ -66,6 +75,11 @@ public class Recognition : IRecognition
             Cv2.Rectangle(frame, rect, obj.IsDanger() ? Scalar.Red : Scalar.Yellow, 2);
             Cv2.PutText(frame, $"Type : {obj.Label}; Status : {obj.Emotion}; Prediction : {obj.Score:P0}", new Point(obj.X, obj.Y - 10), HersheyFonts.HersheySimplex, 0.6, Scalar.White, 2);
         }
+        double detectionMs = (endObj - startObj) * 1000.0 / freq;
+
+        Console.WriteLine($"[SERVER] Detection: {detectionMs:F2}ms");
+
+
     }
 
 }
