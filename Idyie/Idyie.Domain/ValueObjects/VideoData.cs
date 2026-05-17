@@ -1,9 +1,7 @@
-using System;
-using System.Diagnostics.Contracts;
 
-namespace Idyie.Dto;
+namespace Idyie.Domain.ValueObjects;
 
-public class AvaloniaVideoData
+public class VideoData
 {
     public int W {get; set;}
     public int H {get; set;}

@@ -2,10 +2,11 @@ using System;
 using System.Net.Sockets;
 using System.Threading.Channels;
 using Idyie.Domain.Buisness.Service.Interface;
+using Idyie.Domain.Ports.Input;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class BSServerRedirecting : IBSServerRedirecting
+public class ServerRedirectingHandler : IServerRedirectingHandler
 {
 
     private readonly IBSRecognition _bsRecognition;
@@ -16,7 +17,7 @@ public class BSServerRedirecting : IBSServerRedirecting
         SingleWriter = true
     });
 
-    public BSServerRedirecting(IBSRecognition bsRecognition)
+    public ServerRedirectingHandler(IBSRecognition bsRecognition)
     {
         _bsRecognition = bsRecognition;
     }

@@ -7,18 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML" Version="5.0.0" />
-    <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="5.0.0" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.26.0" />
-    <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="5.0.0" />
-    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260427" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260427" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Version="4.13.0.20260427" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../Idyie.Dao/Idyie.Dao.csproj" />
-    <ProjectReference Include="../Idyie.Dto/Idyie.Dto.csproj" />
+    <Folder Include="Entities/" />
+    <Folder Include="Services/" />
   </ItemGroup>
 
 </Project>

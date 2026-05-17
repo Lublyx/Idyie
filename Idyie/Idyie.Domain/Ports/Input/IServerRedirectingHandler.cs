@@ -1,9 +1,8 @@
-using System;
 using System.Net.Sockets;
 
-namespace Idyie.Domain.Buisness.Service.Interface;
+namespace Idyie.Domain.Ports.Input;
 
-public interface IBSServerRedirecting
+public interface IServerRedirectingHandler
 {
 
     public Task InputStreaming(TcpListener serverInput);

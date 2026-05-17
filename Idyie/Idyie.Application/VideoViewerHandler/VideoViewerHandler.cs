@@ -1,22 +1,20 @@
-using System;
 using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using Idyie.Domain.Buisness.Service.Interface;
-using Idyie.Dto;
-using OpenCvSharp;
+using Idyie.Domain.Ports.Input;
+using Idyie.Domain.ValueObjects;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class BSVideoViewer : IBSVideoViewer
+public class VideoViewerHandler : IVideoViewerHandler
 {
     private const string _ipAdress = "127.0.0.1";
     private const int _port = 5002;
     private TcpClient? _tcpClient;
     private bool _isRunning = false;
 
-    public async Task StartVideoViewer(Action<AvaloniaVideoData> action, CancellationToken token)
+    public async Task StartVideoViewer(Action<VideoData> action, CancellationToken token)
     {
 
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(_ipAdress), _port);
