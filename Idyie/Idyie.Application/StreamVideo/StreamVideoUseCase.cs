@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using Idyie.Domain.Ports.Input;
 using Idyie.Domain.Ports.Output;
 
-namespace Idyie.Domain.Buisness.Service;
+namespace Idyie.Application.StreamVideo;
 
 public class StreamVideoUseCase : IStreamVideoUseCase
 {

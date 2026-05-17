@@ -4,30 +4,23 @@ using Avalonia.Threading;
 using Avalonia.Media.Imaging;
 using Avalonia;
 using Avalonia.Platform;
-using Idyie.Dto;
 using System.Threading;
-using ServiceInterface.Interfaces;
-using ServiceInterface.Services;
-using System.Net;
-using Avalonia.Media;
-using System.Net.Sockets;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Buffers;
-using System.IO;
+using Idyie.Domain.Ports.Input;
+using Idyie.Domain.ValueObjects;
 
 namespace IdyieUI;
 
 public partial class MainWindow : Avalonia.Controls.Window
 {
 
-    private readonly ISIStreaming _streaming;
+    private readonly IVideoViewerUseCase _videoViwer;
 
 
-    public MainWindow(ISIStreaming streaming)
+    public MainWindow(IVideoViewerUseCase videoViwer)
     {
         InitializeComponent();
-        _streaming = streaming;
+        _videoViwer = videoViwer;
 
         BtnStartRecording.Click += StartVideo;
         BtnStopRecording.Click += StopVideo;
@@ -38,7 +31,7 @@ public partial class MainWindow : Avalonia.Controls.Window
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         TaskCompletionSource task = new TaskCompletionSource();
 
-        await _streaming.StartVideoViewer((data =>
+        await _videoViwer.StartVideoViewer((data =>
         {
             DisplayAvaloniaData(data);
         }), cancellationTokenSource.Token);
@@ -49,10 +42,10 @@ public partial class MainWindow : Avalonia.Controls.Window
 
     private void StopVideo(object? sender, EventArgs e)
     {
-        _streaming.EndVideoViewer();
+        _videoViwer.EndVideoViewer();
     }
 
-    private void DisplayAvaloniaData(AvaloniaVideoData videoData)
+    private void DisplayAvaloniaData(VideoData videoData)
     {
         Dispatcher.UIThread.Post(() =>
                 {

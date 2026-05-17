@@ -4,7 +4,7 @@ using System.Threading.Channels;
 using Idyie.Domain.Ports.Input;
 using Idyie.Domain.Ports.Output;
 
-namespace Idyie.Domain.Buisness.Service;
+namespace Idyie.Application.ServerRedirecting;
 
 public class ServerRedirectingUseCase : IServerRedirectingUseCase
 {
