@@ -107,8 +107,10 @@ public class ObjectDetection : IObjectDetection
         _inferenceSession = new InferenceSession(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, MODEL_PATH), opts);
     }
 
-    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.75f)
+    public List<ObjectDetected> DetectObjects(byte[] frameData, float threshold = 0.75f)
     {
+        Mat frame = Cv2.ImDecode(frameData, ImreadModes.Color);
+
         DenseTensor<float> tensor = MatToTensor(frame);
 
         List<NamedOnnxValue> inputs = new List<NamedOnnxValue>
@@ -175,7 +177,7 @@ public class ObjectDetection : IObjectDetection
 
             if (maxScore < threshold) continue;
 
-            _objectDetecteds.Add(new ObjectDetected
+            ObjectDetected objectDetected = new ObjectDetected
             {
                 Label = _cocoLabels[classId],
                 Score = maxScore,
@@ -185,7 +187,9 @@ public class ObjectDetection : IObjectDetection
                 H = (int)(newH * scaleY),
                 Emotion = Status.Emotions.Normal,
                 EmotionTimeOut = DateTime.Now
-            });
+            };
+
+            _objectDetecteds.Add(objectDetected);
         }
         return ApplyNMS(_objectDetecteds, 0.45f);
     }

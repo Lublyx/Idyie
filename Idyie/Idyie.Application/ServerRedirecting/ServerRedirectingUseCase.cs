@@ -96,12 +96,8 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
             {
                 await foreach (var (size, frame, frameSize) in _channel.Reader.ReadAllAsync())
                 {
-                    long writeStart = Stopwatch.GetTimestamp();
                     await streamOutput.WriteAsync(size);
                     await streamOutput.WriteAsync(frame.AsMemory(0, frameSize));
-                    long writeEnd = Stopwatch.GetTimestamp();
-
-                    Console.WriteLine($"[SERVER] Write: {(writeEnd - writeStart) / 10000}ms | FrameSize: {frameSize}b");
                 }
             }
             catch

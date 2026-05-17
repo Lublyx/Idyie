@@ -57,13 +57,7 @@ public class Recognition : IRecognition
 
     private void DetectObjects(Mat frame, Mat brg)
     {
-        double freq = Stopwatch.Frequency;
-
-        long startObj = Stopwatch.GetTimestamp();
-
-        List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg);
-        long endObj = Stopwatch.GetTimestamp();
-
+        List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg.ImEncode(".jpg"));
 
         // if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
 
@@ -71,15 +65,9 @@ public class Recognition : IRecognition
         {
             if (!obj.ToDisplay()) continue;
 
-            Rect rect = new Rect(obj.X, obj.Y, obj.W, obj.H);
+            Rect rect = new Rect(obj.X, obj.Y+100, obj.W, obj.H);
             Cv2.Rectangle(frame, rect, obj.IsDanger() ? Scalar.Red : Scalar.Yellow, 2);
             Cv2.PutText(frame, $"Type : {obj.Label}; Status : {obj.Emotion}; Prediction : {obj.Score:P0}", new Point(obj.X, obj.Y - 10), HersheyFonts.HersheySimplex, 0.6, Scalar.White, 2);
         }
-        double detectionMs = (endObj - startObj) * 1000.0 / freq;
-
-        Console.WriteLine($"[SERVER] Detection: {detectionMs:F2}ms");
-
-
     }
-
 }
