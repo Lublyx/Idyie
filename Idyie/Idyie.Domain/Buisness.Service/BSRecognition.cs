@@ -31,8 +31,7 @@ public class BSRecognition : IBSRecognition
             Cv2.CvtColor(frame, gray, ColorConversionCodes.BGR2GRAY);
             Cv2.EqualizeHist(gray, gray);
 
-            byte[] jpgImage = frame.ImEncode(".jpg");
-            DetectObjects(frame, frame, jpgImage);
+            DetectObjects(frame, frame);
             // DetectFace(brg, gray);
 
             Cv2.ImEncode(".jpg", frame, out byte[] jpg);
@@ -60,8 +59,10 @@ public class BSRecognition : IBSRecognition
             Cv2.Rectangle(frame, face, _emotionStatus == Status.Emotions.Danger ? Scalar.Red : Scalar.Yellow, 2);
     }
 
-    private void DetectObjects(Mat frame, Mat brg, byte[] jpgImage)
+    private void DetectObjects(Mat frame, Mat brg)
     {
+        byte[] jpgImage = frame.ImEncode(".jpg");
+
 
         List<ObjectDetected> objectDetecteds = _bsObjectDetection.DetectObjects(brg);
 
