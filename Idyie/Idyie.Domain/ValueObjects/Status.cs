@@ -1,6 +1,5 @@
-using System.Collections.Immutable;
 
-namespace Idyie.Dto;
+namespace Idyie.Domain.ValueObjects;
 
 public static class Status
 {

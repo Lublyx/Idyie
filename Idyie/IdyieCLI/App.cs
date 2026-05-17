@@ -1,14 +1,14 @@
-using ServiceInterface.Interfaces;
+using Idyie.Domain.Ports.Input;
 
 namespace IdyieCLI;
 
 public class App
 {
-    private readonly ISIStreaming _siStreaming;
+    private readonly IStreamVideoUseCase _streamVideoUseCase;
 
-    public App(ISIStreaming siStreaming)
+    public App(IStreamVideoUseCase streamVideoUseCase)
     {
-        _siStreaming = siStreaming;
+        _streamVideoUseCase = streamVideoUseCase;
     }
 
     public async Task Run()
@@ -17,7 +17,7 @@ public class App
         {
             try
             {
-                await _siStreaming.StartStreaming();
+                await _streamVideoUseCase.StreamVideo();
             }
             catch (Exception e)
             {

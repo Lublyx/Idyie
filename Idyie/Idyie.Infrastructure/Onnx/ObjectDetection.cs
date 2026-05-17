@@ -100,8 +100,10 @@ public class ObjectDetection : IObjectDetection
         _inferenceSession = new InferenceSession(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, MODEL_PATH));
     }
 
-    public List<ObjectDetected> DetectObjects(Mat frame, float threshold = 0.75f)
+    public List<ObjectDetected> DetectObjects(byte[] frameData, float threshold = 0.75f)
     {
+        Mat frame = Cv2.ImDecode(frameData, ImreadModes.Color);
+
         DenseTensor<float> tensor = MatToTensor(frame);
 
         List<NamedOnnxValue> inputs = new List<NamedOnnxValue>
@@ -122,7 +124,7 @@ public class ObjectDetection : IObjectDetection
         using Mat blob = CvDnn.BlobFromImage(
             mat,
             1.0 / 255.0,
-            new OpenCvSharp.Size(640, 640),
+            new Size(640, 640),
             new Scalar(),
             swapRB: true,
             crop: false
@@ -172,7 +174,8 @@ public class ObjectDetection : IObjectDetection
                 Y = (int)((cy - newH / 2) * scaleY),
                 W = (int)(newW * scaleX),
                 H = (int)(newH * scaleY),
-                ToDisplay = Status.DangerObjects.Contains<string>(_cocoLabels[classId]) || _cocoLabels[classId] == "person"
+                Emotion = Status.Emotions.Normal,
+                EmotionTimeOut = DateTime.Now
             });
         }
         return ApplyNMS(objectDetecteds, 0.45f);

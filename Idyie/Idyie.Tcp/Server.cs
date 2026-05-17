@@ -1,20 +1,20 @@
 using System.Net;
 using System.Net.Sockets;
-using ServiceInterface.Interfaces;
+using Idyie.Domain.Ports.Input;
 
 namespace Idyie.Tcp;
 
 public class Server
 {
 
-    private readonly ISIServerUtils _serverUtils;
+    private readonly IServerRedirectingUseCase _serverRedirecting;
     private const string _ipAdress = "127.0.0.1";
     private const int _portInput = 5001;
     private const int _portOutput = 5002;
 
-    public Server(ISIServerUtils serverUtils)
+    public Server(IServerRedirectingUseCase serverRedirecting)
     {
-        _serverUtils = serverUtils;
+        _serverRedirecting = serverRedirecting;
     }
 
     public async Task StartServer()
@@ -25,6 +25,6 @@ public class Server
         serverInput.Start();
         serverOutput.Start();
 
-        await Task.WhenAll(_serverUtils.StartInputStreaming(serverInput), _serverUtils.StartOutputStreaming(serverOutput));
+        await Task.WhenAll(_serverRedirecting.InputStreaming(serverInput), _serverRedirecting.OutputStreaming(serverOutput));
     }
 }

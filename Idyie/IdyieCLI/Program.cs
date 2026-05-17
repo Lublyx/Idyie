@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Idyie.Application.ApplicationDependency;
+using Idyie.Domain.Ports.Input;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceInterface.Dependency.Injection;
-using ServiceInterface.Interfaces;
 namespace IdyieCLI;
 
 public static class Program
@@ -9,9 +9,10 @@ public static class Program
     public static async Task Main(string[] args)
     {
         ServiceCollection collection = new ServiceCollection();
-        collection.Resolve();
+        collection.ResolveApplication();
+        collection.ResolveInfrastructure();
 
-        App app = new App(collection.BuildServiceProvider().GetRequiredService<ISIStreaming>());
+        App app = new App(collection.BuildServiceProvider().GetRequiredService<IStreamVideoUseCase>());
         await app.Run();
     }
 }

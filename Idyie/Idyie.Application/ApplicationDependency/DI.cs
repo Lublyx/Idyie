@@ -10,7 +10,7 @@ namespace Idyie.Application.ApplicationDependency;
 public static class DI
 {
 
-    public static void Resolve(this IServiceCollection services)
+    public static IServiceCollection ResolveApplication(this IServiceCollection services)
     {
         services.AddSingleton<IServerRedirectingUseCase, ServerRedirectingUseCase>();
         services.AddSingleton<IStreamVideoUseCase, StreamVideoUseCase>();
@@ -18,5 +18,7 @@ public static class DI
 
         //Domain Services
         services.AddSingleton<IVideoViewerService, VideoViewerService>();
+
+        return services;
     }
 }

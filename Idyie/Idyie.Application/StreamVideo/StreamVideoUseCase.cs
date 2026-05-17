@@ -8,14 +8,14 @@ namespace Idyie.Application.StreamVideo;
 
 public class StreamVideoUseCase : IStreamVideoUseCase
 {
-    private readonly IVideoRecording _bsVideoRecording;
+    private readonly IVideoRecording _videoRecording;
     private const string _ipAdress = "127.0.0.1";
     private const int _port = 5001;
     private readonly SemaphoreSlim _sendThrottle = new(1, 1);
 
-    public StreamVideoUseCase(IVideoRecording bsVideoRecording)
+    public StreamVideoUseCase(IVideoRecording videoRecording)
     {
-        _bsVideoRecording = bsVideoRecording;
+        _videoRecording = videoRecording;
     }
 
     public async Task StreamVideo()
@@ -33,7 +33,7 @@ public class StreamVideoUseCase : IStreamVideoUseCase
         TaskCompletionSource awaitTask = new TaskCompletionSource();
 
 
-        await _bsVideoRecording.StartRecording(async data =>
+        await _videoRecording.StartRecording(async data =>
         {
             if (!await _sendThrottle.WaitAsync(0)) return;
             try

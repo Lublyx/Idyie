@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="../Idyie.Application/Idyie.Application.csproj" />
+      <ProjectReference Include="../Idyie.Infrastructure/Idyie.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

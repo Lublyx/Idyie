@@ -9,7 +9,7 @@ namespace Idyie.Application.ServerRedirecting;
 public class ServerRedirectingUseCase : IServerRedirectingUseCase
 {
 
-    private readonly IRecognition _bsRecognition;
+    private readonly IRecognition _recognition;
     private readonly Channel<(byte[] size, byte[] frame, int frameSize)> _channel = Channel.CreateBounded<(byte[], byte[], int)>(new BoundedChannelOptions(1)
     {
         FullMode = BoundedChannelFullMode.DropOldest,
@@ -17,9 +17,9 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
         SingleWriter = true
     });
 
-    public ServerRedirectingUseCase(IRecognition bsRecognition)
+    public ServerRedirectingUseCase(IRecognition recognition)
     {
-        _bsRecognition = bsRecognition;
+        _recognition = recognition;
     }
 
     public async Task InputStreaming(TcpListener serverInput)
@@ -51,7 +51,7 @@ public class ServerRedirectingUseCase : IServerRedirectingUseCase
 
                     await ReadExectAsync(streamInput, frameBuffer, 0, frameSize);
 
-                    byte[] analysedFrame = _bsRecognition.Analyse(frameBuffer, frameSize);
+                    byte[] analysedFrame = _recognition.Analyse(frameBuffer, frameSize);
                     int analysedFrameSize = analysedFrame.Length;
 
                     byte[] newByteSize = BitConverter.GetBytes(analysedFrameSize);
