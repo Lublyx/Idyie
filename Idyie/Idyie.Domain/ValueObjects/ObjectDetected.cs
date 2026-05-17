@@ -1,6 +1,5 @@
-using System;
 
-namespace Idyie.Dto;
+namespace Idyie.Domain.ValueObjects;
 
 public class ObjectDetected
 {

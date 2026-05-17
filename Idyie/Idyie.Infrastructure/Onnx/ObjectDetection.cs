@@ -1,16 +1,14 @@
-using System;
 using System.Runtime.InteropServices;
-using Idyie.Domain.Buisness.Service.Interface;
-using Idyie.Dto;
+using Idyie.Domain.Ports.Output;
+using Idyie.Domain.ValueObjects;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using Microsoft.ML.Trainers;
 using OpenCvSharp;
 using OpenCvSharp.Dnn;
 
-namespace Idyie.Domain.Buisness.Service;
+namespace Idyie.Infrastructure.Onnx;
 
-public class BSObjectDetection : IBSObjectDetection
+public class ObjectDetection : IObjectDetection
 {
 
     private const string MODEL_PATH = "yolov8s.onnx";
@@ -97,7 +95,7 @@ public class BSObjectDetection : IBSObjectDetection
     "toothbrush"
     };
 
-    public BSObjectDetection()
+    public ObjectDetection()
     {
         _inferenceSession = new InferenceSession(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, MODEL_PATH));
     }

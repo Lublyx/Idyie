@@ -1,7 +1,7 @@
 
 namespace Idyie.Domain.Ports.Input;
 
-public interface IStreamVideoHandler
+public interface IStreamVideoUseCase
 {
     public Task StreamVideo();
 }

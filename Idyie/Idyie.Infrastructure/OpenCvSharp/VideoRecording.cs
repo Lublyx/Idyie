@@ -1,19 +1,17 @@
-using System;
-using System.Runtime.InteropServices;
-using Idyie.Domain.Buisness.Service.Interface;
-using Idyie.Dto;
+using Idyie.Domain.Ports.Output;
+using Idyie.Domain.ValueObjects;
 using OpenCvSharp;
 
-namespace Idyie.Domain.Buisness.Service;
+namespace Idyie.Infrastructure.OpenCvSharp;
 
-public class BSVideoRecording : IBSVideoRecording
+public class VideoRecording : IVideoRecording
 {
     private VideoCapture? _videoCapture;
     private bool _isRunning = false;
-    private Action<AvaloniaVideoData>? _callback;
+    private Action<VideoData>? _callback;
     private CancellationToken? _token;
 
-    public async Task StartRecording(Action<AvaloniaVideoData> callback, CancellationToken token)
+    public async Task StartRecording(Action<VideoData> callback, CancellationToken token)
     {
         _callback = callback;
         _token = token;
@@ -41,7 +39,7 @@ public class BSVideoRecording : IBSVideoRecording
 
                 Cv2.CvtColor(frame, bgra, ColorConversionCodes.BGR2BGRA);
 
-                AvaloniaVideoData videoData = BuildAvaloniaVideoData(bgra);
+                VideoData videoData = BuildAvaloniaVideoData(bgra);
                 
                 _callback?.Invoke(videoData);
 
@@ -56,12 +54,12 @@ public class BSVideoRecording : IBSVideoRecording
         _videoCapture?.Release();
     }
 
-    private AvaloniaVideoData BuildAvaloniaVideoData(Mat bgra)
+    private VideoData BuildAvaloniaVideoData(Mat bgra)
     {
         Mat bgr = new Mat();
         Cv2.CvtColor(bgra, bgr, ColorConversionCodes.BGRA2BGR);
         Cv2.ImEncode(".jpg", bgr, out byte[] jpg);
-        AvaloniaVideoData videoData = new AvaloniaVideoData()
+        VideoData videoData = new VideoData()
         {
             W = bgra.Width,
             H = bgra.Height,

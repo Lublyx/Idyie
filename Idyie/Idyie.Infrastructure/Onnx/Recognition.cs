@@ -1,20 +1,17 @@
-using System;
-using System.Runtime.InteropServices;
-using Idyie.Domain.Buisness.Service.Interface;
-using Idyie.Dto;
+using Idyie.Domain.Ports.Output;
 using OpenCvSharp;
 
-namespace Idyie.Domain.Buisness.Service;
+namespace Idyie.Infrastructure.Onnx;
 
-public class BSRecognition : IBSRecognition
+public class Recognition : IRecognition
 {
-    private readonly IBSObjectDetection _bsObjectDetection;
+    private readonly IObjectDetection _bsObjectDetection;
     private CascadeClassifier? _cascadeClassifier;
     private CascadeClassifier? _cascadeClassifierProfile;
     private string _emotionStatus;
     private DateTime _emotionTimeOut = DateTime.Now;
 
-    public BSRecognition(IBSObjectDetection bsObjectDetection)
+    public Recognition(IObjectDetection bsObjectDetection)
     {
         _bsObjectDetection = bsObjectDetection;
         _emotionStatus = Status.Emotions.Normal;

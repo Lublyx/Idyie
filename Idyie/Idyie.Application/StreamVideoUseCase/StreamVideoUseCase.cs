@@ -1,19 +1,19 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Idyie.Domain.Buisness.Service.Interface;
 using Idyie.Domain.Ports.Input;
+using Idyie.Domain.Ports.Output;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class StreamVideoHandler : IStreamVideoHandler
+public class StreamVideoUseCase : IStreamVideoUseCase
 {
-    private readonly IBSVideoRecording _bsVideoRecording;
+    private readonly IVideoRecording _bsVideoRecording;
     private const string _ipAdress = "127.0.0.1";
     private const int _port = 5001;
     private readonly SemaphoreSlim _sendThrottle = new(1, 1);
 
-    public StreamVideoHandler(IBSVideoRecording bsVideoRecording)
+    public StreamVideoUseCase(IVideoRecording bsVideoRecording)
     {
         _bsVideoRecording = bsVideoRecording;
     }

@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Idyie.Dto/Idyie.Dto.csproj" />
     <ProjectReference Include="../ServiceInterface/ServiceInterface.csproj" />
   </ItemGroup>
 </Project>

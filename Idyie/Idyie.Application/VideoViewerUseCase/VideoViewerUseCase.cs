@@ -7,7 +7,7 @@ using Idyie.Domain.ValueObjects;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class VideoViewerHandler : IVideoViewerHandler
+public class VideoViewerUseCase : IVideoViewerUseCase
 {
     private const string _ipAdress = "127.0.0.1";
     private const int _port = 5002;

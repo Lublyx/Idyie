@@ -2,7 +2,7 @@ using System.Net.Sockets;
 
 namespace Idyie.Domain.Ports.Input;
 
-public interface IServerRedirectingHandler
+public interface IServerRedirectingUseCase
 {
 
     public Task InputStreaming(TcpListener serverInput);

@@ -1,15 +1,15 @@
 using System;
 using System.Net.Sockets;
 using System.Threading.Channels;
-using Idyie.Domain.Buisness.Service.Interface;
 using Idyie.Domain.Ports.Input;
+using Idyie.Domain.Ports.Output;
 
 namespace Idyie.Domain.Buisness.Service;
 
-public class ServerRedirectingHandler : IServerRedirectingHandler
+public class ServerRedirectingUseCase : IServerRedirectingUseCase
 {
 
-    private readonly IBSRecognition _bsRecognition;
+    private readonly IRecognition _bsRecognition;
     private readonly Channel<(byte[] size, byte[] frame, int frameSize)> _channel = Channel.CreateBounded<(byte[], byte[], int)>(new BoundedChannelOptions(1)
     {
         FullMode = BoundedChannelFullMode.DropOldest,
@@ -17,7 +17,7 @@ public class ServerRedirectingHandler : IServerRedirectingHandler
         SingleWriter = true
     });
 
-    public ServerRedirectingHandler(IBSRecognition bsRecognition)
+    public ServerRedirectingUseCase(IRecognition bsRecognition)
     {
         _bsRecognition = bsRecognition;
     }

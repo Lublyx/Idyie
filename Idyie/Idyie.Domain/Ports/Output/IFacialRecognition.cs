@@ -1,8 +1,7 @@
-using System;
 
-namespace Idyie.Domain.Buisness.Service.Interface;
+namespace Idyie.Domain.Ports.Output;
 
-public interface IBSFacialRecognition
+public interface IFacialRecognition
 {
 
 }
