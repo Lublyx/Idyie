@@ -9,10 +9,12 @@ namespace Idyie.Infrastructure.OpenCvSharp;
 public class Recognition : IRecognition
 {
     private readonly IObjectDetection _objectDetection;
+    private readonly IFacialRecognition _facialRecognition;
 
-    public Recognition(IObjectDetection objectDetection)
+    public Recognition(IObjectDetection objectDetection, IFacialRecognition facialRecognition)
     {
         _objectDetection = objectDetection;
+        _facialRecognition = facialRecognition;
     }
 
     public byte[] Analyse(byte[] frameBuffer, int frameSize)
@@ -58,6 +60,8 @@ public class Recognition : IRecognition
     private void DetectObjects(Mat frame, Mat brg)
     {
         List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg.ImEncode(".jpg"));
+
+        _facialRecognition.DetectFace(objectDetecteds);
 
         // if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
 
