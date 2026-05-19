@@ -5,5 +5,5 @@ namespace Idyie.Domain.Ports.Output;
 
 public interface IFacialRecognition
 {
-    public void DetectFace(List<ObjectDetected> objectDetecteds);
+    public void DetectFace(List<ObjectDetected> objectDetecteds, byte[] pixels);
 }

@@ -61,7 +61,7 @@ public class Recognition : IRecognition
     {
         List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg.ImEncode(".jpg"));
 
-        _facialRecognition.DetectFace(objectDetecteds);
+        _facialRecognition.DetectFace(objectDetecteds, brg.ImEncode(".jpg")); // surveiller la coruption de l'image
 
         // if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
 
