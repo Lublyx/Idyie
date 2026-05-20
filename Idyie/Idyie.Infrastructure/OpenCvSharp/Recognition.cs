@@ -31,8 +31,6 @@ public class Recognition : IRecognition
             // DetectFace(brg, gray);
 
             Cv2.ImEncode(".jpg", frame, out byte[] jpg);
-            // Console.WriteLine($"[SERVER]  Face Analyse: {(endAlani - startAnali) / 10000}ms | FrameSize: {frameSize}b");
-
             return jpg;
         }
         catch (Exception e)
@@ -41,21 +39,6 @@ public class Recognition : IRecognition
             return frameBuffer;
         }
     }
-
-    // private void DetectFace(Mat frame, Mat gray)
-    // {
-    //     Rect[] facesDefault = _cascadeClassifier!.DetectMultiScale(
-    //             gray, scaleFactor: 1.1, minNeighbors: 5);
-
-    //     Rect[] facesProfile = _cascadeClassifierProfile!.DetectMultiScale(
-    //         gray, scaleFactor: 1.1, minNeighbors: 5);
-
-    //     IList<Rect> faces = [.. facesDefault, .. facesProfile];
-
-
-    //     foreach (Rect face in faces)
-    //         Cv2.Rectangle(frame, face, _emotionStatus == Status.Emotions.Danger ? Scalar.Red : Scalar.Yellow, 2);
-    // }
 
     private void DetectObjects(Mat frame, Mat brg)
     {
