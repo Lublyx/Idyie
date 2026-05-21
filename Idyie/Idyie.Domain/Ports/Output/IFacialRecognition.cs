@@ -5,5 +5,7 @@ namespace Idyie.Domain.Ports.Output;
 
 public interface IFacialRecognition
 {
-    public void DetectFace(List<ObjectDetected> objectDetecteds, byte[] pixels);
+    public List<FaceEmbedding> ExtractEmbedding(List<ObjectDetected> objectDetecteds, byte[] pixels);
+
+    public float[] ExtractEmbedding(byte[] pixels);
 }

@@ -6,7 +6,7 @@ public class FaceEmbedding
 {
     public required float[] DataFaceEmbedding {get; set;}
 
-    public float Compare(float[] embedding)
+    public bool Compare(float[] embedding)
     {
         float dot = 0;
         float mag1 = 0;
@@ -19,6 +19,6 @@ public class FaceEmbedding
             mag2 += embedding[i] * embedding[i];
         }
 
-        return dot / (MathF.Sqrt(mag1) * MathF.Sqrt(mag2));
+        return dot / (MathF.Sqrt(mag1) * MathF.Sqrt(mag2)) > 0.8f;
     }
 }

@@ -1,4 +1,5 @@
 
+using System.Runtime.InteropServices;
 using Idyie.Domain.Ports.Output;
 using Idyie.Domain.ValueObjects;
 using Microsoft.ML.OnnxRuntime;
@@ -13,52 +14,72 @@ public class FacialRecognition : IFacialRecognition
     private readonly CascadeClassifier _cascadeClassifier = new CascadeClassifier("/home/lucas/Documents/1-PROJET/Idyie/Idyie/IdyieUI/bin/Debug/net8.0/haarcascade_frontalface_default.xml");
     private readonly CascadeClassifier _cascadeClassifierProfile = new CascadeClassifier("/home/lucas/Documents/1-PROJET/Idyie/Idyie/IdyieUI/bin/Debug/net8.0/haarcascade_profileface.xml");
 
-    public void DetectFace(List<ObjectDetected> objectDetecteds, byte[] pixels)
+    public List<FaceEmbedding> ExtractEmbedding(List<ObjectDetected> objectDetecteds, byte[] pixels)
     {
+        List<FaceEmbedding> faceEmbeddings = new List<FaceEmbedding>();
         foreach (ObjectDetected obj in objectDetecteds)
         {
             if (!obj.ToDisplay()) continue;
 
-
-            DenseTensor<float> tensor = new DenseTensor<float>(new[] {1, 3, 122, 122});
-
-            for (int y = 0; y < 122; y++)
+            FaceEmbedding faceEmbedding = new FaceEmbedding()
             {
-                for (int x = 0; x < 122; x++)
-                {
-                    int idx = (y * 122 * x) * 3;
+                DataFaceEmbedding = ExtractEmbedding(pixels)
+            };
+            faceEmbeddings.Add(faceEmbedding);
+        }
+        return faceEmbeddings;
+    }
 
-                    tensor[0, 0, y, x] = (pixels[idx + 2] / 255f - 0.5f) / 0.5f;
-                    tensor[0, 1, y, x] = (pixels[idx + 1] / 255f - 0.5f) / 0.5f;
-                    tensor[0, 2, y, x] = (pixels[idx + 0] / 255f - 0.5f) / 0.5f;
-                }
+    public float[] ExtractEmbedding(byte[] pixels)
+    {
+        byte[] face = DetectFace(Cv2.ImDecode(pixels, ImreadModes.Color));
+
+        DenseTensor<float> tensor = new DenseTensor<float>(new[] { 1, 3, 112, 112 });
+
+        for (int y = 0; y < 112; y++)
+        {
+            for (int x = 0; x < 112; x++)
+            {
+                int idx = (y * 112 + x) * 3;
+
+                tensor[0, 0, y, x] = (face[idx + 2] / 255f - 0.5f) / 0.5f;
+                tensor[0, 1, y, x] = (face[idx + 1] / 255f - 0.5f) / 0.5f;
+                tensor[0, 2, y, x] = (face[idx + 0] / 255f - 0.5f) / 0.5f;
             }
+        }
 
-            List<NamedOnnxValue> inputs = new List<NamedOnnxValue>{
+        List<NamedOnnxValue> inputs = new List<NamedOnnxValue>{
                 NamedOnnxValue.CreateFromTensor("data", tensor)
             };
 
-            using var results = _session.Run(inputs);
-            //return results.First().AsEnumerable<float>().ToArray;
-        }
+        using var results = _session.Run(inputs);
+        return results[0].AsEnumerable<float>().ToArray();
     }
 
-    private void DetectFace(/*Mat frame,*/ Mat gray)
+    private byte[] DetectFace(/*Mat frame,*/ Mat brg)
     {
         Rect[] facesDefault = _cascadeClassifier!.DetectMultiScale(
-                gray, scaleFactor: 1.1, minNeighbors: 5);
+                brg, scaleFactor: 1.1, minNeighbors: 5);
 
-        Rect[] facesProfile = _cascadeClassifierProfile!.DetectMultiScale(
-            gray, scaleFactor: 1.1, minNeighbors: 5);
+        // Rect[] facesProfile = _cascadeClassifierProfile!.DetectMultiScale(
+        //     gray, scaleFactor: 1.1, minNeighbors: 5);
 
-        gray.Resize(0, new Scalar(112, 112));
-        facesDefault.ToTensor<float>();
-        Mat faces = new Mat();
 
         // IList<Rect> faces = [.. facesDefault, .. facesProfile];
+        byte[] bytes = new byte[112 * 112 * 3];
 
 
-        // foreach (Rect face in faces)
-        //     Cv2.Rectangle(frame, face, _emotionStatus == Status.Emotions.Danger ? Scalar.Red : Scalar.Yellow, 2);
+        foreach (Rect face in facesDefault)
+        {
+            using Mat faceRoi = new Mat(brg, face);
+            using Mat faceResize = new Mat();
+
+            Cv2.Resize(faceRoi, faceResize, new Size(112, 112));
+
+            Marshal.Copy(faceResize.Data, bytes, 0, bytes.Length);
+        }
+        return bytes; // Penser a changer le return pour avoir toutes les faces
     }
 }
+
+//     Cv2.Rectangle(frame, face, _emotionStatus == Status.Emotions.Danger ? Scalar.Red : Scalar.Yellow, 2);

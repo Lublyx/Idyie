@@ -44,7 +44,16 @@ public class Recognition : IRecognition
     {
         List<ObjectDetected> objectDetecteds = _objectDetection.DetectObjects(brg.ImEncode(".jpg"));
 
-        _facialRecognition.DetectFace(objectDetecteds, brg.ImEncode(".jpg")); // surveiller la coruption de l'image
+        List<FaceEmbedding> faceEmbeddings = _facialRecognition.ExtractEmbedding(objectDetecteds, brg.ImEncode(".jpg")); // surveiller la coruption de l'image
+        FaceEmbedding faceEmbeddingOrigine = new FaceEmbedding()
+        {
+            DataFaceEmbedding = _facialRecognition.ExtractEmbedding(Cv2.ImRead("/home/lucas/Documents/Information/portrait.jpg", ImreadModes.Color).ImEncode(".jpg"))
+        };
+
+        foreach (FaceEmbedding faceEmbedding in faceEmbeddings)
+        {
+            if (faceEmbedding.Compare(faceEmbeddingOrigine.DataFaceEmbedding)) Console.WriteLine("Lucas");
+        }
 
         // if (objectDetecteds.Count == 0 && _emotionTimeOut < DateTime.Now.AddSeconds(-10)) _emotionStatus = EmotionStatus.Normal;
 
