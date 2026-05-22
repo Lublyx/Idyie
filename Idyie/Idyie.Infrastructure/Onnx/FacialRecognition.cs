@@ -32,7 +32,8 @@ public class FacialRecognition : IFacialRecognition
 
     public float[] ExtractEmbedding(byte[] pixels)
     {
-        byte[] face = DetectFace(Cv2.ImDecode(pixels, ImreadModes.Color));
+        using Mat face = DetectFace(Cv2.ImDecode(pixels, ImreadModes.Color));
+        if (face == null || face.Empty()) return [];
 
         DenseTensor<float> tensor = new DenseTensor<float>(new[] { 1, 3, 112, 112 });
 
@@ -40,11 +41,15 @@ public class FacialRecognition : IFacialRecognition
         {
             for (int x = 0; x < 112; x++)
             {
-                int idx = (y * 112 + x) * 3;
+                Vec3b color = face.At<Vec3b>(y, x);
 
-                tensor[0, 0, y, x] = (face[idx + 2] / 255f - 0.5f) / 0.5f;
-                tensor[0, 1, y, x] = (face[idx + 1] / 255f - 0.5f) / 0.5f;
-                tensor[0, 2, y, x] = (face[idx + 0] / 255f - 0.5f) / 0.5f;
+                byte b = color.Item0;
+                byte g = color.Item1;
+                byte r = color.Item2;
+
+                tensor[0, 0, y, x] = (r / 255f - 0.5f) / 0.5f;
+                tensor[0, 1, y, x] = (g / 255f - 0.5f) / 0.5f;
+                tensor[0, 2, y, x] = (b / 255f - 0.5f) / 0.5f;
             }
         }
 
@@ -53,32 +58,49 @@ public class FacialRecognition : IFacialRecognition
             };
 
         using var results = _session.Run(inputs);
-        return results[0].AsEnumerable<float>().ToArray();
+        float[] embedding = results[0].AsEnumerable<float>().ToArray();
+        return L2Normalize(embedding);
     }
 
-    private byte[] DetectFace(/*Mat frame,*/ Mat brg)
+    private float[] L2Normalize(float[] embedding)
     {
+        float sum = 0;
+
+        for (int i = 0; i < embedding.Length; i++)
+            sum += embedding[i] * embedding[i];
+
+        float norm = MathF.Sqrt(sum);
+
+        for (int i = 0; i < embedding.Length; i++)
+            embedding[i] /= norm;
+
+        return embedding;
+    }
+
+    private Mat DetectFace(/*Mat frame,*/ Mat bgr)
+    {
+        using Mat gray = new Mat();
+        Cv2.CvtColor(bgr, gray, ColorConversionCodes.BGR2GRAY);
+        Cv2.EqualizeHist(gray, gray);
+
         Rect[] facesDefault = _cascadeClassifier!.DetectMultiScale(
-                brg, scaleFactor: 1.1, minNeighbors: 5);
+                gray, scaleFactor: 1.1, minNeighbors: 5);
 
         // Rect[] facesProfile = _cascadeClassifierProfile!.DetectMultiScale(
         //     gray, scaleFactor: 1.1, minNeighbors: 5);
 
 
         // IList<Rect> faces = [.. facesDefault, .. facesProfile];
-        byte[] bytes = new byte[112 * 112 * 3];
 
-
+        using Mat faceResize = new Mat();
         foreach (Rect face in facesDefault)
         {
-            using Mat faceRoi = new Mat(brg, face);
-            using Mat faceResize = new Mat();
+            using Mat faceRoi = new Mat(bgr, face);
 
             Cv2.Resize(faceRoi, faceResize, new Size(112, 112));
 
-            Marshal.Copy(faceResize.Data, bytes, 0, bytes.Length);
         }
-        return bytes; // Penser a changer le return pour avoir toutes les faces
+        return faceResize.Clone(); // Penser a changer le return pour avoir toutes les faces
     }
 }
 
